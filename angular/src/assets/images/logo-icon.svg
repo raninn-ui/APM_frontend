@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 60" width="60" height="60">
+  <!-- Background circle -->
+  <circle cx="30" cy="30" r="28" fill="#ffffff" opacity="0.2"/>
+
+  <!-- APM Icon -->
+  <text x="30" y="40" font-family="Arial, sans-serif" font-size="28" font-weight="bold" text-anchor="middle" fill="#ffffff">
+    A
+  </text>
+</svg>
+
