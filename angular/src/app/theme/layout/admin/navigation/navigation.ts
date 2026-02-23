@@ -35,6 +35,22 @@ export const NavigationItems: NavigationItem[] = [
     ]
   },
   {
+    id: 'action-plans',
+    title: 'Mes plans d\'action',
+    type: 'group',
+    icon: 'icon-group',
+    children: [
+      {
+        id: 'action-plans-list',
+        title: 'Plans d\'action',
+        type: 'item',
+        url: '/action-plans',
+        classes: 'nav-item',
+        icon: 'feather icon-check-square'
+      }
+    ]
+  },
+  {
     id: 'ui-component',
     title: 'Ui Component',
     type: 'group',

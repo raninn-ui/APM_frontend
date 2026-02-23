@@ -1,0 +1,175 @@
+<div class="row">
+  <div class="col-xl-12">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h4>Mes plans d'action</h4>
+      <button
+        class="btn btn-primary"
+        (click)="openAddPlanModal(addPlanModal)">
+        <i class="feather icon-plus"></i>
+        Ajouter un nouveau plan
+      </button>
+    </div>
+
+    <!-- Action Plans List -->
+    <app-card cardTitle="Liste des plans d'action" blockClass="table-border-style">
+      <div class="table-responsive">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Titre</th>
+              <th>Pilote</th>
+              <th>Processus</th>
+              <th>Date Création</th>
+              <th>Type</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let plan of actionPlans()">
+              <td>{{ plan.id }}</td>
+              <td><strong>{{ plan.title }}</strong></td>
+              <td>
+                <div *ngFor="let pilot of plan.pilots" class="badge badge-light-primary me-1 mb-1">
+                  {{ pilot }}
+                </div>
+              </td>
+              <td>{{ plan.process }}</td>
+              <td>{{ plan.creationDate }}</td>
+              <td>
+                <span [class]="'badge ' + (plan.type === 'Mono-Pilote' ? 'badge-primary' : 'badge-success')">
+                  {{ plan.type }}
+                </span>
+              </td>
+              <td>
+                <button
+                  class="btn btn-sm btn-danger"
+                  (click)="deletePlan(plan.id)"
+                  title="Supprimer">
+                  <i class="feather icon-trash-2"></i>
+                </button>
+              </td>
+            </tr>
+            <tr *ngIf="actionPlans().length === 0">
+              <td colspan="7" class="text-center text-muted py-4">
+                Aucun plan d'action. Cliquez sur "Ajouter un nouveau plan" pour en créer un.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </app-card>
+  </div>
+</div>
+
+<!-- Modal for Adding New Plan -->
+<ng-template #addPlanModal let-modal>
+  <div class="modal-header">
+    <h5 class="modal-title">Nouveau plan d'action</h5>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    <form (ngSubmit)="addNewPlan(modal)">
+      <div class="row">
+        <div class="col-md-12 mb-3">
+          <label class="form-label">Titre</label>
+          <input
+            type="text"
+            class="form-control"
+            placeholder="Titre du plan"
+            [(ngModel)]="newPlan().title"
+            name="title"
+            required>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label class="form-label">Type</label>
+          <select
+            class="form-select"
+            [(ngModel)]="newPlan().type"
+            name="type"
+            (change)="onTypeChange()">
+            <option value="Mono-Pilote">Mono-Pilote</option>
+            <option value="Multi-Pilote">Multi-Pilote</option>
+          </select>
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">Processus</label>
+          <select
+            class="form-select"
+            [(ngModel)]="newPlan().process"
+            name="process"
+            required>
+            <option value="">Sélectionner un processus</option>
+            <option *ngFor="let proc of processes" [value]="proc">{{ proc }}</option>
+          </select>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label class="form-label">Pilote(s)</label>
+          <ng-container [ngSwitch]="newPlan().type">
+            <div *ngSwitchCase="'Mono-Pilote'" class="form-control" style="background-color: #f8f9fa;">
+              <small class="text-muted">{{ newPlan().selectedPilots[0] }}</small>
+            </div>
+            <select
+              *ngSwitchCase="'Multi-Pilote'"
+              class="form-select"
+              name="pilots"
+              #pilotSelect="ngModel"
+              [(ngModel)]="selectedPilotValue"
+              required>
+              <option value="">Ajouter un pilote</option>
+              <option *ngFor="let emp of employees" [value]="emp.name">
+                {{ emp.name }} ({{ emp.role }})
+              </option>
+            </select>
+          </ng-container>
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">Date Création</label>
+          <input
+            type="text"
+            class="form-control"
+            [(ngModel)]="newPlan().creationDate"
+            name="creationDate"
+            readonly>
+        </div>
+      </div>
+      <ng-container [ngSwitch]="newPlan().type">
+        <div class="row" *ngSwitchCase="'Multi-Pilote'">
+          <div class="col-md-12 mb-3">
+            <label class="form-label">Pilotes sélectionnés</label>
+            <div class="d-flex flex-wrap gap-2">
+              <span *ngFor="let pilot of newPlan().selectedPilots" class="badge badge-primary">
+                {{ pilot }}
+                <button
+                  type="button"
+                  class="btn-close btn-close-white ms-1"
+                  (click)="removePilot(pilot)"
+                  style="font-size: 0.7rem;">
+                </button>
+              </span>
+            </div>
+            <button
+              type="button"
+              class="btn btn-sm btn-outline-primary mt-2"
+              (click)="addPilot(selectedPilotValue); selectedPilotValue = ''">
+              Ajouter
+            </button>
+          </div>
+        </div>
+      </ng-container>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="modal.dismiss()">
+          Annuler
+        </button>
+        <button type="submit" class="btn btn-primary">
+          <i class="feather icon-check"></i> Ajouter
+        </button>
+      </div>
+    </form>
+  </div>
+</ng-template>
+
