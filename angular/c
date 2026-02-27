@@ -1,0 +1,41 @@
+import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
+import { FormsModule } from '@angular/forms';
+
+@Component({
+  selector: 'app-stat-responsables-verif',
+  standalone: true,
+  imports: [CommonModule, RouterModule, FormsModule],
+  templateUrl: '../stat-mensuel/stat-mensuel.component.html',
+  styleUrls: ['../stat-mensuel/stat-mensuel.component.scss']
+})
+export class StatResponsablesVerifComponent {
+  pageTitle = 'Statistique des Responsables de Verification';
+  annees = ['2024', '2023'];
+  types = ['Tous'];
+  services = ['Tous'];
+  selectedAnnee = '2024';
+  selectedType = 'Tous';
+  selectedService = 'Tous';
+  summaryCards = [
+    { title: 'Total Responsables', value: '18', icon: 'feather icon-shield', color: 'primary' },
+    { title: 'Verifications Faite', value: '156', icon: 'feather icon-check', color: 'success' },
+    { title: 'En Cours', value: '24', icon: 'feather icon-clock', color: 'warning' },
+    { title: 'En Retard', value: '8', icon: 'feather icon-alert-circle', color: 'danger' }
+  ];
+  chartData = [
+    { label: 'R1', creees: 28, terminees: 22 },
+    { label: 'R2', creees: 24, terminees: 20 },
+    { label: 'R3', creees: 20, terminees: 16 },
+    { label: 'R4', creees: 18, terminees: 14 },
+    { label: 'R5', creees: 15, terminees: 12 }
+  ];
+  maxValue = 35;
+  tableData = [
+    { mois: 'Responsable 1', creees: 28, terminees: 22, enCours: 4, retard: 2 },
+    { mois: 'Responsable 2', creees: 24, terminees: 20, enCours: 3, retard: 1 },
+    { mois: 'Responsable 3', creees: 20, terminees: 16, enCours: 3, retard: 1 }
+  ];
+  onFilterChange() {}
+}

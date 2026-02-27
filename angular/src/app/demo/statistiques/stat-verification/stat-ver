@@ -1,0 +1,41 @@
+import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
+import { FormsModule } from '@angular/forms';
+
+@Component({
+  selector: 'app-stat-verification',
+  standalone: true,
+  imports: [CommonModule, RouterModule, FormsModule],
+  templateUrl: '../stat-mensuel/stat-mensuel.component.html',
+  styleUrls: ['../stat-mensuel/stat-mensuel.component.scss']
+})
+export class StatVerificationComponent {
+  pageTitle = 'Statistique des Verification';
+  annees = ['2024', '2023'];
+  types = ['Tous'];
+  services = ['Tous'];
+  selectedAnnee = '2024';
+  selectedType = 'Tous';
+  selectedService = 'Tous';
+  summaryCards = [
+    { title: 'Total Verifications', value: '89', icon: 'feather icon-check-circle', color: 'primary' },
+    { title: 'Validees', value: '72', icon: 'feather icon-check', color: 'success' },
+    { title: 'En Attente', value: '12', icon: 'feather icon-clock', color: 'warning' },
+    { title: 'Rejetees', value: '5', icon: 'feather icon-x-circle', color: 'danger' }
+  ];
+  chartData = [
+    { label: 'V1', creees: 25, terminees: 22 },
+    { label: 'V2', creees: 20, terminees: 18 },
+    { label: 'V3', creees: 18, terminees: 15 },
+    { label: 'V4', creees: 15, terminees: 12 },
+    { label: 'V5', creees: 11, terminees: 5 }
+  ];
+  maxValue = 30;
+  tableData = [
+    { mois: 'Verification 1', creees: 25, terminees: 22, enCours: 2, retard: 1 },
+    { mois: 'Verification 2', creees: 20, terminees: 18, enCours: 1, retard: 1 },
+    { mois: 'Verification 3', creees: 18, terminees: 15, enCours: 2, retard: 1 }
+  ];
+  onFilterChange() {}
+}

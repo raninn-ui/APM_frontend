@@ -1,0 +1,113 @@
+<div class="stat-page-container">
+  <!-- Breadcrumb -->
+  <div class="breadcrumb">
+    <a routerLink="/"><i class="feather icon-home"></i></a>
+    <i class="feather icon-chevron-right"></i>
+    <a routerLink="/statistiques">Statistiques</a>
+    <i class="feather icon-chevron-right"></i>
+    <span>Mensuel</span>
+  </div>
+
+  <!-- Page Header -->
+  <div class="page-header">
+    <h1>{{ pageTitle }}</h1>
+  </div>
+
+  <!-- Filter Bar -->
+  <div class="filter-bar">
+    <div class="filter-item">
+      <label>Année</label>
+      <select [(ngModel)]="selectedAnnee" (change)="onFilterChange()">
+        <option *ngFor="let annee of annees" [value]="annee">{{ annee }}</option>
+      </select>
+    </div>
+    <div class="filter-item">
+      <label>Type</label>
+      <select [(ngModel)]="selectedType" (change)="onFilterChange()">
+        <option *ngFor="let type of types" [value]="type">{{ type }}</option>
+      </select>
+    </div>
+    <div class="filter-item">
+      <label>Service</label>
+      <select [(ngModel)]="selectedService" (change)="onFilterChange()">
+        <option *ngFor="let service of services" [value]="service">{{ service }}</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Summary Cards -->
+  <div class="summary-cards">
+    <div class="card" *ngFor="let card of summaryCards">
+      <div class="card-icon" [ngClass]="'card-' + card.color">
+        <i [class]="card.icon"></i>
+      </div>
+      <div class="card-info">
+        <h4>{{ card.value }}</h4>
+        <p>{{ card.title }}</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chart Section -->
+  <div class="chart-section">
+    <div class="card">
+      <div class="card-header">
+        <h5>Évolution des Actions</h5>
+      </div>
+      <div class="card-body">
+        <div class="chart-container">
+          <div class="chart-bars">
+            <div class="bar-group" *ngFor="let item of chartData">
+              <div class="bar-container">
+                <div class="bar bar-creees" [style.height.%]="(item.creees / maxValue) * 100"></div>
+                <div class="bar bar-terminees" [style.height.%]="(item.terminees / maxValue) * 100"></div>
+              </div>
+              <span class="bar-label">{{ item.label }}</span>
+            </div>
+          </div>
+          <div class="chart-legend">
+            <div class="legend-item">
+              <span class="legend-color" style="background: #409fff;"></span>
+              <span>Créées</span>
+            </div>
+            <div class="legend-item">
+              <span class="legend-color" style="background: #28c76f;"></span>
+              <span>Terminées</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Data Table -->
+  <div class="table-section">
+    <div class="card">
+      <div class="card-header">
+        <h5>Détails Mensuels</h5>
+      </div>
+      <div class="card-body">
+        <table class="table">
+          <thead>
+            <tr>
+              <th>Mois</th>
+              <th>Créées</th>
+              <th>Terminées</th>
+              <th>En Cours</th>
+              <th>En Retard</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let row of tableData">
+              <td>{{ row.mois }}</td>
+              <td><span class="badge badge-primary">{{ row.creees }}</span></td>
+              <td><span class="badge badge-success">{{ row.terminees }}</span></td>
+              <td><span class="badge badge-warning">{{ row.enCours }}</span></td>
+              <td><span class="badge badge-danger">{{ row.retard }}</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
