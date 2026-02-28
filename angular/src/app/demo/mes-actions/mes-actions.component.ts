@@ -237,6 +237,106 @@ export class MesActionsComponent implements OnInit {
       comments: [
         { id: 1, author: 'Nadia Saidani', text: 'Action creee', timestamp: '2026-01-25 10:00', type: 'state_change' }
       ]
+    },
+    {
+      id: 7,
+      title: 'Implémenter un système ERP',
+      planName: 'Plan Informatique 2026',
+      state: 'P',
+      deadline: '2026-04-30',
+      responsable: 'Karim Tounsi',
+      pilote: 'GRITL Walid',
+      theme: 'Informatique',
+      prevCorr: 'Preventive',
+      anomAmel: 'Amelioration',
+      dateCreation: '2026-02-01',
+      criticite: 'Haute',
+      efficacite: 'N/A',
+      description: 'Deployer un nouveau système ERP pour tous les departements',
+      cause: 'Modernisation des systèmes informatiques',
+      commentaire: 'Projet strategique - phase de planification',
+      files: [],
+      comments: [
+        { id: 1, author: 'Karim Tounsi', text: 'Action creee', timestamp: '2026-02-01 09:00', type: 'state_change' }
+      ]
+    },
+    {
+      id: 8,
+      title: 'Audit de sécurité informatique',
+      planName: 'Plan Informatique 2026',
+      state: 'D',
+      deadline: '2026-03-15',
+      responsable: 'Salim Bouazza',
+      pilote: 'Ahmed Benali',
+      theme: 'Securite',
+      prevCorr: 'Preventive',
+      anomAmel: 'Anomalie',
+      dateCreation: '2026-01-30',
+      criticite: 'Haute',
+      efficacite: 'N/A',
+      description: 'Effectuer un audit complet de la sécurité informatique',
+      cause: 'Conformité aux normes de sécurité ISO 27001',
+      commentaire: 'Audit en cours - resultats preliminaires positifs',
+      dateRealisee: '2026-03-10',
+      commentaireClosture: 'Audit realise - rapport en preparation',
+      methodVerification: 'Audit externe par cabinet specialise',
+      files: [
+        { id: 7, name: 'rapport_audit_preliminaire.pdf', description: 'Rapport preliminaire', uploadDate: '2026-03-10' }
+      ],
+      comments: [
+        { id: 1, author: 'Salim Bouazza', text: 'Audit demarree', timestamp: '2026-01-30 10:00', type: 'state_change' },
+        { id: 2, author: 'Salim Bouazza', text: 'Audit realise avec succes', timestamp: '2026-03-10 17:00', type: 'state_change' }
+      ]
+    },
+    {
+      id: 9,
+      title: 'Améliorer la sécurité au travail',
+      planName: 'Plan Sante Securite 2026',
+      state: 'P',
+      deadline: '2026-03-30',
+      responsable: 'Amina Belkaid',
+      pilote: 'GRITL Walid',
+      theme: 'Sante Securite',
+      prevCorr: 'Preventive',
+      anomAmel: 'Amelioration',
+      dateCreation: '2026-02-10',
+      criticite: 'Haute',
+      efficacite: 'N/A',
+      description: 'Mettre en place des mesures de sécurité renforcées dans tous les ateliers',
+      cause: 'Reduction des accidents du travail',
+      commentaire: 'Action prioritaire - impact sur la sante des employes',
+      files: [],
+      comments: [
+        { id: 1, author: 'Amina Belkaid', text: 'Action creee', timestamp: '2026-02-10 08:30', type: 'state_change' }
+      ]
+    },
+    {
+      id: 10,
+      title: 'Certification ISO 9001',
+      planName: 'Plan Qualite 2026',
+      state: 'D',
+      deadline: '2026-05-31',
+      responsable: 'Rachid Mansouri',
+      pilote: 'Ahmed Benali',
+      theme: 'Qualite',
+      prevCorr: 'Preventive',
+      anomAmel: 'Amelioration',
+      dateCreation: '2026-01-05',
+      criticite: 'Haute',
+      efficacite: 'N/A',
+      description: 'Obtenir la certification ISO 9001 pour le systeme de management de la qualite',
+      cause: 'Exigence client et amelioration continue',
+      commentaire: 'Audit de certification en cours - resultats attendus en mai',
+      dateRealisee: '2026-05-15',
+      commentaireClosture: 'Certification obtenue avec succes',
+      methodVerification: 'Audit de certification par organisme accrédité',
+      files: [
+        { id: 8, name: 'certificat_iso_9001.pdf', description: 'Certificat ISO 9001', uploadDate: '2026-05-31' }
+      ],
+      comments: [
+        { id: 1, author: 'Rachid Mansouri', text: 'Processus de certification demarree', timestamp: '2026-01-05 09:00', type: 'state_change' },
+        { id: 2, author: 'Rachid Mansouri', text: 'Audit de certification realise', timestamp: '2026-05-15 16:00', type: 'state_change' }
+      ]
     }
   ]);
 
