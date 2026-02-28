@@ -1,64 +1,1276 @@
 <div class="row">
   <div class="col-xl-12">
-    <div class="d-flex justify-content-between align-items-center mb-3">
-      <h4>Mes plans d'action</h4>
-      <button
-        class="btn btn-primary"
-        (click)="openAddPlanModal(addPlanModal)">
-        <i class="feather icon-plus"></i>
-        Ajouter un nouveau plan
-      </button>
-    </div>
-
-    <!-- Action Plans List -->
-    <app-card cardTitle="Liste des plans d'action" blockClass="table-border-style">
-      <div class="table-responsive">
-        <table class="table table-hover">
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Titre</th>
-              <th>Pilote</th>
-              <th>Processus</th>
-              <th>Date Création</th>
-              <th>Type</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let plan of actionPlans()">
-              <td>{{ plan.id }}</td>
-              <td><strong>{{ plan.title }}</strong></td>
-              <td>
-                <div *ngFor="let pilot of plan.pilots" class="badge badge-light-primary me-1 mb-1">
-                  {{ pilot }}
-                </div>
-              </td>
-              <td>{{ plan.process }}</td>
-              <td>{{ plan.creationDate }}</td>
-              <td>
-                <span [class]="'badge ' + (plan.type === 'Mono-Pilote' ? 'badge-primary' : 'badge-success')">
-                  {{ plan.type }}
-                </span>
-              </td>
-              <td>
-                <button
-                  class="btn btn-sm btn-danger"
-                  (click)="deletePlan(plan.id)"
-                  title="Supprimer">
-                  <i class="feather icon-trash-2"></i>
-                </button>
-              </td>
-            </tr>
-            <tr *ngIf="actionPlans().length === 0">
-              <td colspan="7" class="text-center text-muted py-4">
-                Aucun plan d'action. Cliquez sur "Ajouter un nouveau plan" pour en créer un.
-              </td>
-            </tr>
-          </tbody>
-        </table>
+    <!-- Vue Liste -->
+    <ng-container *ngIf="viewMode() === 'list'">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h4>Mes plans d'action</h4>
+        <button
+          class="btn btn-primary"
+          (click)="openAddPlanModal(addPlanModal)">
+          <i class="feather icon-plus"></i>
+          Ajouter un nouveau plan
+        </button>
       </div>
-    </app-card>
+
+      <!-- Action Plans List -->
+      <app-card cardTitle="Liste des plans d'action" blockClass="table-border-style">
+        <div class="table-responsive">
+          <table class="table table-hover">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Titre</th>
+                <th>Pilote</th>
+                <th>Processus</th>
+                <th>Date Création</th>
+                <th>Type</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let plan of actionPlans()" style="cursor: pointer;" (click)="viewPlanDetails(plan)">
+                <td>{{ plan.id }}</td>
+                <td><strong>{{ plan.title }}</strong></td>
+                <td>
+                  <div *ngFor="let pilot of plan.pilots" class="badge badge-light-primary me-1 mb-1">
+                    {{ pilot }}
+                  </div>
+                </td>
+                <td>{{ plan.process }}</td>
+                <td>{{ plan.creationDate }}</td>
+                <td>
+                  <span [class]="'badge ' + (plan.type === 'Mono-Pilote' ? 'badge-primary' : 'badge-success')">
+                    {{ plan.type }}
+                  </span>
+                </td>
+                <td (click)="$event.stopPropagation()">
+                  <button
+                    class="btn btn-sm btn-danger"
+                    (click)="deletePlan(plan.id)"
+                    title="Supprimer">
+                    <i class="feather icon-trash-2"></i>
+                  </button>
+                </td>
+              </tr>
+              <tr *ngIf="actionPlans().length === 0">
+                <td colspan="7" class="text-center text-muted py-4">
+                  Aucun plan d'action. Cliquez sur "Ajouter un nouveau plan" pour en créer un.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </app-card>
+    </ng-container>
+
+    <!-- Vue Détail -->
+    <ng-container *ngIf="viewMode() === 'detail' && selectedPlan()">
+      <!-- Back Button -->
+      <div class="mb-4">
+        <button class="btn btn-secondary btn-sm" (click)="backToList()">
+          <i class="feather icon-arrow-left"></i> Retour à la Liste
+        </button>
+      </div>
+
+      <!-- Header Section - Single Row with 4 Zones -->
+      <div class="header-container mb-4">
+        <!-- ZONE 1: Plan Info (25%) -->
+        <div class="header-zone zone-1">
+          <div class="info-item">
+            <span class="info-label">Titre :</span>
+            <span class="info-value">{{ selectedPlan()?.title }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Date Création :</span>
+            <span class="info-value">{{ selectedPlan()?.creationDate }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Statut :</span>
+            <span class="badge badge-status" [class.badge-warning]="selectedPlan()?.status === 'Modifié'" [class.badge-success]="selectedPlan()?.status === 'Validé'" [class.badge-secondary]="selectedPlan()?.status === 'Clôturé'">
+              <i class="feather icon-alert-circle me-1" *ngIf="selectedPlan()?.status === 'Modifié'"></i>
+              {{ selectedPlan()?.status }}
+            </span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Date Modification :</span>
+            <span class="info-value">{{ selectedPlan()?.modificationDate }}</span>
+          </div>
+        </div>
+
+        <!-- ZONE 2: Gauge (20%) -->
+        <div class="header-zone zone-2">
+          <div class="gauge-label">Taux d'avancement</div>
+          <app-radial-gauge [percentage]="getProgressPercentage()"></app-radial-gauge>
+        </div>
+
+        <!-- ZONE 3: Stats Panel (25%) -->
+        <div class="header-zone zone-3">
+          <div class="stat-row">
+            <span class="stat-label">Total d'Actions</span>
+            <span class="badge badge-stat">{{ getTotalActions() }}</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Actions en cours</span>
+            <span class="badge badge-stat">{{ getActionsInProgress() }}</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Actions clôturées</span>
+            <span class="badge badge-stat">{{ getCompletedActions() }}</span>
+          </div>
+          <div class="stat-row">
+            <span class="stat-label">Dont Actions retard</span>
+            <span class="badge badge-stat">{{ getOverdueActions() }}</span>
+          </div>
+        </div>
+
+        <!-- ZONE 4: Processus & Pilote (20%) -->
+        <div class="header-zone zone-4">
+          <div class="info-item">
+            <span class="info-label">Processus :</span>
+            <span class="info-value">{{ selectedPlan()?.process }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Pilote :</span>
+            <span class="info-value">{{ selectedPlan()?.pilots?.[0] }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons Row -->
+      <div class="mb-4 d-flex gap-2 justify-content-between">
+        <div class="d-flex gap-2">
+          <button class="btn btn-primary btn-sm" (click)="openAddActionModal()" [disabled]="isPlanClosed()">
+            <i class="feather icon-plus"></i> Ajouter Action
+          </button>
+          <button class="btn btn-success btn-sm" (click)="validatePlan()" [disabled]="isPlanClosed()">
+            <i class="feather icon-check"></i> Valider Plan
+          </button>
+          <button class="btn btn-warning btn-sm" (click)="closePlan()" [disabled]="isPlanClosed()">
+            <i class="feather icon-x"></i> Cloturer Plan
+          </button>
+          <button class="btn btn-info btn-sm" (click)="openDocumentsModal()">
+            <i class="feather icon-file"></i> Gestion Documents
+          </button>
+        </div>
+        <button class="btn btn-warning btn-sm" (click)="exportToCSV()">
+          <i class="feather icon-download"></i> Exporter
+        </button>
+      </div>
+
+      <!-- Table Controls -->
+      <div class="card mb-4">
+        <div class="card-body">
+          <div class="row align-items-center">
+            <div class="col-md-6">
+              <div class="d-flex align-items-center gap-3">
+                <label class="text-muted mb-0 fw-bold">Lignes par page :</label>
+                <select class="form-select form-select-sm table-control-select" [(ngModel)]="rowsPerPage" (change)="currentPage.set(1)">
+                  <option [value]="5">5</option>
+                  <option [value]="10">10</option>
+                  <option [value]="20">20</option>
+                  <option [value]="50">50</option>
+                </select>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <input
+                type="text"
+                class="form-control form-control-sm"
+                placeholder="Rechercher..."
+                [(ngModel)]="searchTerm">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Actions Table -->
+      <div class="card">
+        <div class="table-responsive">
+          <table class="table table-hover mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Rédacteur</th>
+                <th>N°</th>
+                <th>Thème</th>
+                <th>DATE</th>
+                <th>ANOM/AMÉL</th>
+                <th>IMME/CORR</th>
+                <th>Criticité</th>
+                <th>Cause</th>
+                <th>Action</th>
+                <th>Responsable</th>
+                <th>Délai</th>
+                <th>DateRealisée</th>
+                <th>Méthode vérification</th>
+                <th>Date prévue vérif</th>
+                <th>Date vérif</th>
+                <th>Efficacité</th>
+                <th>Méthode mesure</th>
+                <th>Commentaire</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let action of getPaginatedActions()">
+                <!-- Redacteur -->
+                <td (dblclick)="startEditingCell(action.id, 'redacteur', action.redacteur)"
+                    [class.editing-cell]="isEditingCell(action.id, 'redacteur')"
+                    class="editable-cell">
+                  <ng-container *ngIf="!isEditingCell(action.id, 'redacteur')">
+                    {{ action.redacteur }}
+                  </ng-container>
+                  <ng-container *ngIf="isEditingCell(action.id, 'redacteur')">
+                    <input type="text" class="form-control form-control-sm"
+                           [(ngModel)]="editingValue"
+                           (keyup.enter)="saveEditingCell()"
+                           (keyup.escape)="cancelEditingCell()"
+                           autofocus>
+                  </ng-container>
+                </td>
+
+                <!-- ID -->
+                <td>{{ action.id }}</td>
+
+                <!-- Theme -->
+                <td (dblclick)="startEditingCell(action.id, 'theme', action.theme)"
+                    [class.editing-cell]="isEditingCell(action.id, 'theme')"
+                    class="editable-cell">
+                  <ng-container *ngIf="!isEditingCell(action.id, 'theme')">
+                    <strong>{{ action.theme }}</strong>
+                  </ng-container>
+                  <ng-container *ngIf="isEditingCell(action.id, 'theme')">
+                    <input type="text" class="form-control form-control-sm"
+                           [(ngModel)]="editingValue"
+                           (keyup.enter)="saveEditingCell()"
+                           (keyup.escape)="cancelEditingCell()"
+                           autofocus>
+                  </ng-container>
+                </td>
+
+                <!-- Date -->
+                <td>{{ action.date }}</td>
+
+                <!-- Anomalie/Amélioration -->
+                <td (dblclick)="startEditingCell(action.id, 'anomAmel', action.anomAmel)"
+                    [class.editing-cell]="isEditingCell(action.id, 'anomAmel')"
+                    class="editable-cell">
+                  <ng-container *ngIf="!isEditingCell(action.id, 'anomAmel')">
+                    <span class="badge badge-light-warning">{{ action.anomAmel }}</span>
+                  </ng-container>
+                  <ng-container *ngIf="isEditingCell(action.id, 'anomAmel')">
+                    <input type="text" class="form-control form-control-sm"
+                           [(ngModel)]="editingValue"
+                           (keyup.enter)="saveEditingCell()"
+                           (keyup.escape)="cancelEditingCell()"
+                           autofocus>
+                  </ng-container>
+                </td>
+
+                <!-- IMME/CORR -->
+                <td (dblclick)="startEditingCell(action.id, 'immeCorr', action.immeCorr)"
+                    [class.editing-cell]="isEditingCell(action.id, 'immeCorr')"
+                    class="editable-cell">
+                  <ng-container *ngIf="!isEditingCell(action.id, 'immeCorr')">
+                    <span class="badge badge-light-info">{{ action.immeCorr }}</span>
+                  </ng-container>
+                  <ng-container *ngIf="isEditingCell(action.id, 'immeCorr')">
+                    <input type="text" class="form-control form-control-sm"
+                           [(ngModel)]="editingValue"
+                           (keyup.enter)="saveEditingCell()"
+                           (keyup.escape)="cancelEditingCell()"
+                           autofocus>
+                  </ng-container>
+                </td>
+
+                <!-- Criticité -->
+                <td (dblclick)="startEditingCell(action.id, 'criticite', action.criticite)"
+                    [class.editing-cell]="isEditingCell(action.id, 'criticite')"
+                    class="editable-cell">
+                  <ng-container *ngIf="!isEditingCell(action.id, 'criticite')">
+                    <span class="badge criticite-badge"
+                          [class.criticite-critique]="action.criticite === 'Critique'"
+                          [class.criticite-majeure]="action.criticite === 'Majeure'"
+                          [class.criticite-mineure]="action.criticite === 'Mineure'">
+                      {{ action.criticite }}
+                    </span>
+                  </ng-container>
+                  <ng-container *ngIf="isEditingCell(action.id, 'criticite')">
+                    <input type="text" class="form-control form-control-sm"
+                           [(ngModel)]="editingValue"
+                           (keyup.enter)="saveEditingCell()"
+                           (keyup.escape)="cancelEditingCell()"
+                           autofocus>
+                  </ng-container>
+                </td>
+
+                <!-- Cause -->
+                <td (dblclick)="startEditingCell(action.id, 'cause', action.cause)"
+                    [class.editing-cell]="isEditingCell(action.id, 'cause')"
+                    class="editable-cell">
+                  <ng-container *ngIf="!isEditingCell(action.id, 'cause')">
+                    {{ action.cause }}
+                  </ng-container>
+                  <ng-container *ngIf="isEditingCell(action.id, 'cause')">
+                    <input type="text" class="form-control form-control-sm"
+                           [(ngModel)]="editingValue"
+                           (keyup.enter)="saveEditingCell()"
+                           (keyup.escape)="cancelEditingCell()"
+                           autofocus>
+                  </ng-container>
+                </td>
+
+                <!-- Action -->
+                <td (dblclick)="startEditingCell(action.id, 'action', action.action)"
+                    [class.editing-cell]="isEditingCell(action.id, 'action')"
+                    class="editable-cell">
+                  <ng-container *ngIf="!isEditingCell(action.id, 'action')">
+                    {{ action.action }}
+                  </ng-container>
+                  <ng-container *ngIf="isEditingCell(action.id, 'action')">
+                    <input type="text" class="form-control form-control-sm"
+                           [(ngModel)]="editingValue"
+                           (keyup.enter)="saveEditingCell()"
+                           (keyup.escape)="cancelEditingCell()"
+                           autofocus>
+                  </ng-container>
+                </td>
+
+                <!-- Responsable -->
+                <td (dblclick)="startEditingCell(action.id, 'responsable', action.responsable)"
+                    [class.editing-cell]="isEditingCell(action.id, 'responsable')"
+                    class="editable-cell">
+                  <ng-container *ngIf="!isEditingCell(action.id, 'responsable')">
+                    {{ action.responsable }}
+                  </ng-container>
+                  <ng-container *ngIf="isEditingCell(action.id, 'responsable')">
+                    <input type="text" class="form-control form-control-sm"
+                           [(ngModel)]="editingValue"
+                           (keyup.enter)="saveEditingCell()"
+                           (keyup.escape)="cancelEditingCell()"
+                           autofocus>
+                  </ng-container>
+                </td>
+
+                <!-- Délai -->
+                <td (dblclick)="startEditingCell(action.id, 'delai', action.delai)"
+                    [class.editing-cell]="isEditingCell(action.id, 'delai')"
+                    class="editable-cell">
+                  <ng-container *ngIf="!isEditingCell(action.id, 'delai')">
+                    {{ action.delai }}
+                  </ng-container>
+                  <ng-container *ngIf="isEditingCell(action.id, 'delai')">
+                    <input type="date" class="form-control form-control-sm"
+                           [(ngModel)]="editingValue"
+                           (keyup.enter)="saveEditingCell()"
+                           (keyup.escape)="cancelEditingCell()"
+                           autofocus>
+                  </ng-container>
+                </td>
+
+                <!-- DateRealisée -->
+                <td (dblclick)="startEditingCell(action.id, 'dateRealisee', action.dateRealisee)"
+                    [class.editing-cell]="isEditingCell(action.id, 'dateRealisee')"
+                    class="editable-cell">
+                  <ng-container *ngIf="!isEditingCell(action.id, 'dateRealisee')">
+                    {{ action.dateRealisee || '-' }}
+                  </ng-container>
+                  <ng-container *ngIf="isEditingCell(action.id, 'dateRealisee')">
+                    <input type="date" class="form-control form-control-sm"
+                           [(ngModel)]="editingValue"
+                           (keyup.enter)="saveEditingCell()"
+                           (keyup.escape)="cancelEditingCell()"
+                           autofocus>
+                  </ng-container>
+                </td>
+
+                <!-- Méthode vérification -->
+                <td (dblclick)="startEditingCell(action.id, 'methodeVerification', action.methodeVerification)"
+                    [class.editing-cell]="isEditingCell(action.id, 'methodeVerification')"
+                    class="editable-cell">
+                  <ng-container *ngIf="!isEditingCell(action.id, 'methodeVerification')">
+                    {{ action.methodeVerification }}
+                  </ng-container>
+                  <ng-container *ngIf="isEditingCell(action.id, 'methodeVerification')">
+                    <input type="text" class="form-control form-control-sm"
+                           [(ngModel)]="editingValue"
+                           (keyup.enter)="saveEditingCell()"
+                           (keyup.escape)="cancelEditingCell()"
+                           autofocus>
+                  </ng-container>
+                </td>
+
+                <!-- Date prévue vérif -->
+                <td (dblclick)="startEditingCell(action.id, 'datePreveueVerification', action.datePreveueVerification)"
+                    [class.editing-cell]="isEditingCell(action.id, 'datePreveueVerification')"
+                    class="editable-cell">
+                  <ng-container *ngIf="!isEditingCell(action.id, 'datePreveueVerification')">
+                    {{ action.datePreveueVerification }}
+                  </ng-container>
+                  <ng-container *ngIf="isEditingCell(action.id, 'datePreveueVerification')">
+                    <input type="date" class="form-control form-control-sm"
+                           [(ngModel)]="editingValue"
+                           (keyup.enter)="saveEditingCell()"
+                           (keyup.escape)="cancelEditingCell()"
+                           autofocus>
+                  </ng-container>
+                </td>
+
+                <!-- Date vérif -->
+                <td (dblclick)="startEditingCell(action.id, 'dateVerification', action.dateVerification)"
+                    [class.editing-cell]="isEditingCell(action.id, 'dateVerification')"
+                    class="editable-cell">
+                  <ng-container *ngIf="!isEditingCell(action.id, 'dateVerification')">
+                    {{ action.dateVerification || '-' }}
+                  </ng-container>
+                  <ng-container *ngIf="isEditingCell(action.id, 'dateVerification')">
+                    <input type="date" class="form-control form-control-sm"
+                           [(ngModel)]="editingValue"
+                           (keyup.enter)="saveEditingCell()"
+                           (keyup.escape)="cancelEditingCell()"
+                           autofocus>
+                  </ng-container>
+                </td>
+
+                <!-- Efficacité -->
+                <td (dblclick)="startEditingCell(action.id, 'efficacite', action.efficacite)"
+                    [class.editing-cell]="isEditingCell(action.id, 'efficacite')"
+                    class="editable-cell">
+                  <ng-container *ngIf="!isEditingCell(action.id, 'efficacite')">
+                    <span class="badge badge-light-success">{{ action.efficacite }}</span>
+                  </ng-container>
+                  <ng-container *ngIf="isEditingCell(action.id, 'efficacite')">
+                    <input type="text" class="form-control form-control-sm"
+                           [(ngModel)]="editingValue"
+                           (keyup.enter)="saveEditingCell()"
+                           (keyup.escape)="cancelEditingCell()"
+                           autofocus>
+                  </ng-container>
+                </td>
+
+                <!-- Méthode mesure -->
+                <td (dblclick)="startEditingCell(action.id, 'methodeEfficacite', action.methodeEfficacite)"
+                    [class.editing-cell]="isEditingCell(action.id, 'methodeEfficacite')"
+                    class="editable-cell">
+                  <ng-container *ngIf="!isEditingCell(action.id, 'methodeEfficacite')">
+                    <span class="badge badge-light-primary">{{ action.methodeEfficacite }}</span>
+                  </ng-container>
+                  <ng-container *ngIf="isEditingCell(action.id, 'methodeEfficacite')">
+                    <input type="text" class="form-control form-control-sm"
+                           [(ngModel)]="editingValue"
+                           (keyup.enter)="saveEditingCell()"
+                           (keyup.escape)="cancelEditingCell()"
+                           autofocus>
+                  </ng-container>
+                </td>
+
+                <!-- Commentaire -->
+                <td (dblclick)="startEditingCell(action.id, 'commentaire', action.commentaire)"
+                    [class.editing-cell]="isEditingCell(action.id, 'commentaire')"
+                    class="editable-cell">
+                  <ng-container *ngIf="!isEditingCell(action.id, 'commentaire')">
+                    {{ action.commentaire }}
+                  </ng-container>
+                  <ng-container *ngIf="isEditingCell(action.id, 'commentaire')">
+                    <input type="text" class="form-control form-control-sm"
+                           [(ngModel)]="editingValue"
+                           (keyup.enter)="saveEditingCell()"
+                           (keyup.escape)="cancelEditingCell()"
+                           autofocus>
+                  </ng-container>
+                </td>
+                <td>
+                  <button class="btn btn-sm btn-link text-info" (click)="openActionDetail(action)" title="Info">
+                    <i class="feather icon-info"></i>
+                  </button>
+                  <button class="btn btn-sm btn-link text-danger" (click)="deleteAction(action.id)" title="Supprimer">
+                    <i class="feather icon-x"></i>
+                  </button>
+                </td>
+              </tr>
+              <tr *ngIf="getPaginatedActions().length === 0">
+                <td colspan="19" class="text-center text-muted py-4">
+                  Aucune action trouvée.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="card-footer d-flex justify-content-between align-items-center">
+          <span class="text-muted pagination-info">
+            <strong>Page {{ currentPage() }} sur {{ getTotalPages() }}</strong> |
+            Affichage {{ (currentPage() - 1) * rowsPerPage() + 1 }} à {{ Math.min(currentPage() * rowsPerPage(), getFilteredActions().length) }} sur {{ getFilteredActions().length }}
+          </span>
+          <nav>
+            <ul class="pagination mb-0">
+              <li class="page-item" [class.disabled]="currentPage() === 1">
+                <button class="page-link" (click)="currentPage() > 1 && currentPage.set(currentPage() - 1)">
+                  <i class="feather icon-chevron-left"></i> Précédent
+                </button>
+              </li>
+              <li class="page-item" *ngFor="let page of [].constructor(getTotalPages()); let i = index" [class.active]="i + 1 === currentPage()">
+                <button class="page-link" (click)="currentPage.set(i + 1)">{{ i + 1 }}</button>
+              </li>
+              <li class="page-item" [class.disabled]="currentPage() === getTotalPages()">
+                <button class="page-link" (click)="currentPage() < getTotalPages() && currentPage.set(currentPage() + 1)">
+                  Suivant <i class="feather icon-chevron-right"></i>
+                </button>
+              </li>
+            </ul>
+          </nav>
+        </div>
+      </div>
+    </ng-container>
+
+    <!-- Vue Détail Action - NEW PROFESSIONAL INTERFACE -->
+    <ng-container *ngIf="viewMode() === 'action-detail' && selectedActionDetail()">
+      <!-- Top Navigation Bar -->
+      <div class="action-detail-navbar">
+        <div class="navbar-left">
+          <button class="btn-back" (click)="closeActionDetail()">
+            <i class="feather icon-arrow-left"></i> Retour Plan d'Action
+          </button>
+        </div>
+        <div class="navbar-center">
+          <h2 class="navbar-title">Action #{{ selectedActionDetail()?.id }} - {{ selectedActionDetail()?.theme }}</h2>
+        </div>
+        <div class="navbar-right">
+        </div>
+      </div>
+
+      <!-- Header Summary Card -->
+      <div class="action-detail-header-card">
+        <div class="header-grid">
+          <!-- Left Column -->
+          <div class="header-column">
+            <div class="header-field">
+              <label>Thème</label>
+              <p>{{ selectedActionDetail()?.theme }}</p>
+            </div>
+            <div class="header-field">
+              <label>PREV/CORR</label>
+              <p>{{ selectedActionDetail()?.immeCorr }}</p>
+            </div>
+            <div class="header-field">
+              <label>Anomalie/Amélio</label>
+              <p>{{ selectedActionDetail()?.anomAmel }}</p>
+            </div>
+          </div>
+
+          <!-- Middle Column -->
+          <div class="header-column">
+            <div class="header-field">
+              <label>Date</label>
+              <p>{{ selectedActionDetail()?.date }}</p>
+            </div>
+            <div class="header-field">
+              <label>Criticité</label>
+              <span class="badge criticite-badge"
+                    [class.criticite-critique]="selectedActionDetail()?.criticite === 'Critique'"
+                    [class.criticite-majeure]="selectedActionDetail()?.criticite === 'Majeure'"
+                    [class.criticite-mineure]="selectedActionDetail()?.criticite === 'Mineure'">
+                {{ selectedActionDetail()?.criticite }}
+              </span>
+            </div>
+            <div class="header-field">
+              <label>Efficacité</label>
+              <p>{{ selectedActionDetail()?.efficacite || 'Non mesurée' }}</p>
+            </div>
+            <div class="header-field">
+              <label>Action</label>
+              <p class="text-truncate" [title]="selectedActionDetail()?.action">{{ selectedActionDetail()?.action }}</p>
+            </div>
+          </div>
+
+          <!-- Right Column -->
+          <div class="header-column">
+            <div class="header-field">
+              <label>Responsable</label>
+              <p>{{ selectedActionDetail()?.responsable }}</p>
+            </div>
+            <div class="header-field">
+              <label>Plan d'Action</label>
+              <p>{{ selectedPlan()?.title }}</p>
+            </div>
+            <div class="header-field">
+              <label>Cause</label>
+              <p class="text-truncate" [title]="selectedActionDetail()?.cause">{{ selectedActionDetail()?.cause }}</p>
+            </div>
+            <div class="header-field">
+              <label>Commentaire</label>
+              <p class="text-truncate" [title]="selectedActionDetail()?.commentaire">{{ selectedActionDetail()?.commentaire || '-' }}</p>
+            </div>
+          </div>
+
+          <!-- Far Right Column -->
+          <div class="header-column header-column-right">
+            <div class="header-field">
+              <label>Délai</label>
+              <span class="badge badge-delai">{{ selectedActionDetail()?.delai }}</span>
+            </div>
+            <div class="header-field">
+              <label>Pilote</label>
+              <p>{{ selectedPlan()?.pilots?.[0] || '-' }}</p>
+            </div>
+            <div class="header-field">
+              <label>État</label>
+              <div class="status-buttons">
+                <button class="status-btn status-p" [class.active]="selectedActionDetail()?.state === 'P'" disabled>P</button>
+                <button class="status-btn status-d" [class.active]="selectedActionDetail()?.state === 'D'" disabled>D</button>
+                <button class="status-btn status-c" [class.active]="selectedActionDetail()?.state === 'C'" disabled>C</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Three-Column Section: Réalisation, Vérification, Efficacité -->
+      <div class="action-detail-three-columns">
+        <!-- Column 1: Réalisation de l'Action (Responsable space) -->
+        <div class="action-card" [class.disabled]="selectedActionDetail()?.state !== 'P'">
+          <div class="action-card-header">
+            <h5><i class="feather icon-play-circle"></i> Réalisation de l'Action</h5>
+          </div>
+          <div class="action-card-body">
+            <div class="status-text" *ngIf="selectedActionDetail()?.state === 'P'">
+              <p class="text-muted">
+                <i class="feather icon-alert-circle"></i> Cette action n'est pas encore réalisée
+              </p>
+            </div>
+            <div class="status-text" *ngIf="selectedActionDetail()?.state !== 'P'">
+              <p class="text-success">
+                <i class="feather icon-check-circle"></i> Action réalisée le {{ selectedActionDetail()?.dateRealisee }}
+              </p>
+            </div>
+
+            <!-- Closure Form (shown when state = P and form is active) -->
+            <ng-container *ngIf="selectedActionDetail()?.state === 'P' && !showClosureForm()">
+              <button class="btn btn-primary btn-action" (click)="initiateActionClosure()">
+                <i class="feather icon-check"></i> Clôturer l'action
+              </button>
+            </ng-container>
+
+            <ng-container *ngIf="showClosureForm()">
+              <div class="alert alert-warning" *ngIf="!hasUploadedFile()">
+                <i class="feather icon-alert-triangle"></i>
+                <strong>Attention:</strong> Vous devez uploader un fichier avant de clôturer l'action
+              </div>
+              <div class="form-group">
+                <label>Commentaire de clôture</label>
+                <textarea class="form-control" rows="3" [(ngModel)]="actionClosureComment" placeholder="Décrivez la clôture..."></textarea>
+              </div>
+              <div class="form-group">
+                <label>Méthode de vérification</label>
+                <textarea class="form-control" rows="3" [(ngModel)]="actionClosureMethod" placeholder="Méthode utilisée..."></textarea>
+              </div>
+              <div class="form-group">
+                <label>Date de vérification</label>
+                <input type="date" class="form-control" [(ngModel)]="actionClosureDate">
+              </div>
+              <div class="form-actions">
+                <button class="btn btn-success" (click)="submitActionClosure()" [disabled]="!hasUploadedFile()">
+                  <i class="feather icon-save"></i> Enregistrer
+                </button>
+                <button class="btn btn-secondary" (click)="cancelActionClosure()">
+                  <i class="feather icon-x"></i> Annuler
+                </button>
+              </div>
+            </ng-container>
+          </div>
+        </div>
+
+        <!-- Column 2: Date et méthode de vérification -->
+        <div class="action-card" [class.disabled]="selectedActionDetail()?.state === 'C'">
+          <div class="action-card-header">
+            <h5><i class="feather icon-clipboard"></i> Date et méthode de vérification</h5>
+          </div>
+          <div class="action-card-body">
+            <div class="form-group">
+              <label>Date vérification</label>
+              <input type="date" class="form-control" [(ngModel)]="selectedActionDetail()!.dateVerification" [disabled]="selectedActionDetail()?.state === 'C'">
+            </div>
+            <div class="form-group">
+              <label>Méthode de vérification</label>
+              <textarea class="form-control" rows="4" [(ngModel)]="selectedActionDetail()!.methodeVerification" [disabled]="selectedActionDetail()?.state === 'C'" placeholder="Décrivez la méthode de vérification..."></textarea>
+            </div>
+            <button class="btn btn-success btn-action" [disabled]="selectedActionDetail()?.state === 'C'" (click)="saveVerificationData()">
+              <i class="feather icon-save"></i> Enregistrer
+            </button>
+          </div>
+        </div>
+
+        <!-- Column 3: Mesure d'efficacité (Pilote space) -->
+        <div class="action-card" [class.disabled]="selectedActionDetail()?.state !== 'D'">
+          <div class="action-card-header">
+            <h5><i class="feather icon-trending-up"></i> Mesure d'efficacité</h5>
+          </div>
+          <div class="action-card-body">
+            <div class="status-text" *ngIf="selectedActionDetail()?.state === 'P'">
+              <p class="text-muted">
+                <i class="feather icon-alert-circle"></i> Action pas encore réalisée par le responsable
+              </p>
+            </div>
+
+            <div *ngIf="selectedActionDetail()?.state === 'D'">
+              <div class="alert alert-warning" *ngIf="!hasUploadedFile()">
+                <i class="feather icon-alert-triangle"></i>
+                <strong>Attention:</strong> Vous devez uploader un fichier avant de valider l'action
+              </div>
+              <div class="form-group">
+                <label>Évaluation de l'efficacité</label>
+                <textarea class="form-control" rows="3" [(ngModel)]="efficacyComment" placeholder="Commentaire sur l'efficacité..."></textarea>
+              </div>
+
+              <div class="form-group">
+                <label>Notation</label>
+                <div class="emoji-rating">
+                  <button class="emoji-btn" [class.active]="efficacyRating() === 1" (click)="efficacyRating.set(1)" title="Faible">😞</button>
+                  <button class="emoji-btn" [class.active]="efficacyRating() === 2" (click)="efficacyRating.set(2)" title="Moyen">😐</button>
+                  <button class="emoji-btn" [class.active]="efficacyRating() === 3" (click)="efficacyRating.set(3)" title="Bon">😊</button>
+                  <button class="emoji-btn" [class.active]="efficacyRating() === 4" (click)="efficacyRating.set(4)" title="Excellent">✅</button>
+                </div>
+              </div>
+
+              <div class="form-actions">
+                <button class="btn btn-success" (click)="submitEfficacyValidation()" [disabled]="efficacyRating() === 0 || !hasUploadedFile()">
+                  <i class="feather icon-check"></i> Valider l'action
+                </button>
+                <button class="btn btn-danger" (click)="initiateRejection()">
+                  <i class="feather icon-x"></i> Rejeter
+                </button>
+              </div>
+            </div>
+
+            <div class="status-text" *ngIf="selectedActionDetail()?.state === 'C'">
+              <p class="text-success">
+                <i class="feather icon-check-circle"></i> Action Vérifiée ✅
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Rejection Form Modal -->
+      <div class="rejection-modal" *ngIf="showRejectionForm()">
+        <div class="rejection-modal-content">
+          <h4>Créer une nouvelle action</h4>
+          <div class="form-group">
+            <label>Titre</label>
+            <input type="text" class="form-control" [(ngModel)]="rejectionFormData().titre" placeholder="Titre de la nouvelle action">
+          </div>
+          <div class="form-group">
+            <label>Cause</label>
+            <input type="text" class="form-control" [(ngModel)]="rejectionFormData().cause" placeholder="Cause">
+          </div>
+          <div class="form-group">
+            <label>Responsable</label>
+            <select class="form-control" [(ngModel)]="rejectionFormData().responsable">
+              <option value="">Sélectionner un responsable</option>
+              <option *ngFor="let emp of employees" [value]="emp.name">{{ emp.name }}</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Délai</label>
+            <input type="date" class="form-control" [(ngModel)]="rejectionFormData().delai">
+          </div>
+          <div class="form-actions">
+            <button class="btn btn-success" (click)="submitRejection()">
+              <i class="feather icon-check"></i> Confirmer
+            </button>
+            <button class="btn btn-secondary" (click)="cancelRejection()">
+              <i class="feather icon-x"></i> Annuler
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Two-Column Section: Fichiers et Commentaires -->
+      <div class="action-detail-two-columns">
+        <!-- Left: Fichier Annexe -->
+        <div class="action-card">
+          <div class="action-card-header">
+            <h5><i class="feather icon-paperclip"></i> Fichier Annexe à cette Action</h5>
+          </div>
+          <div class="action-card-body">
+            <div class="files-list">
+              <ng-container *ngIf="uploadedFiles() && uploadedFiles().length > 0">
+                <div class="file-item" *ngFor="let file of uploadedFiles()">
+                  <div class="file-icon">
+                    <i class="feather icon-file"></i>
+                  </div>
+                  <div class="file-info">
+                    <p class="file-name">{{ file.name }}</p>
+                    <p class="file-description">{{ file.description }}</p>
+                    <p class="file-date">{{ file.date }}</p>
+                  </div>
+                </div>
+              </ng-container>
+              <p class="text-muted text-center py-4" *ngIf="!uploadedFiles() || uploadedFiles().length === 0">
+                <i class="feather icon-inbox"></i> Aucun fichier annexe
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Ajouter un fichier -->
+        <div class="action-card">
+          <div class="action-card-header">
+            <h5><i class="feather icon-upload"></i> Ajouter un fichier annexe</h5>
+          </div>
+          <div class="action-card-body">
+            <div class="form-group">
+              <label>Description Fichier</label>
+              <input type="text" class="form-control" [(ngModel)]="fileDescription" placeholder="Décrivez le fichier...">
+            </div>
+            <div class="form-group">
+              <label>Choisir un fichier</label>
+              <div class="file-input-wrapper">
+                <input type="file" class="form-control" #fileInput (change)="onFileSelected($event)">
+              </div>
+            </div>
+            <button class="btn btn-primary btn-action" (click)="fileInput.click()" *ngIf="!fileInput.value">
+              <i class="feather icon-upload-cloud"></i> Choisir un fichier
+            </button>
+            <button class="btn btn-success btn-action" (click)="onFileSelected({target: {files: fileInput.files}})" *ngIf="fileInput.value && fileDescription()">
+              <i class="feather icon-upload-cloud"></i> Upload
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Two-Column Section: Historique et Ajouter Commentaire -->
+      <div class="action-detail-two-columns">
+        <!-- Left: Historique des commentaires -->
+        <div class="action-card">
+          <div class="action-card-header">
+            <h5><i class="feather icon-history"></i> Historique des commentaires</h5>
+          </div>
+          <div class="action-card-body">
+            <div class="comments-history">
+              <ng-container *ngIf="selectedActionDetail()?.comments && selectedActionDetail()!.comments!.length > 0">
+                <div class="comment-item" *ngFor="let comment of selectedActionDetail()?.comments">
+                  <div class="comment-header">
+                    <strong>{{ comment.author }}</strong>
+                    <span class="comment-time">{{ comment.timestamp }}</span>
+                  </div>
+                  <div class="comment-badge" [ngClass]="'badge-' + comment.type">
+                    {{ comment.type === 'state_change' ? '📌 État' : comment.type === 'rejection' ? '❌ Rejet' : '💬 Commentaire' }}
+                  </div>
+                  <p class="comment-text">{{ comment.text }}</p>
+                </div>
+              </ng-container>
+              <p class="text-muted text-center py-4" *ngIf="!selectedActionDetail()?.comments || selectedActionDetail()!.comments!.length === 0">
+                <i class="feather icon-message-circle"></i> Aucun commentaire
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Ajouter un Commentaire -->
+        <div class="action-card">
+          <div class="action-card-header">
+            <h5><i class="feather icon-edit-2"></i> Ajouter un Commentaire</h5>
+          </div>
+          <div class="action-card-body">
+            <div class="form-group">
+              <label>Votre commentaire</label>
+              <textarea class="form-control" rows="6" #commentInput placeholder="Ajoutez votre commentaire..."></textarea>
+            </div>
+            <button class="btn btn-primary btn-action" (click)="addComment(commentInput.value); commentInput.value = ''">
+              <i class="feather icon-send"></i> Soumettre
+            </button>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+  </div>
+</div>
+
+<!-- Toast Notification -->
+<div class="toast-notification" *ngIf="showToast()">
+  {{ toastMessage() }}
+</div>
+
+<!-- Modal for Adding New Action -->
+<div class="modal fade" [class.show]="showAddActionModal()" [style.display]="showAddActionModal() ? 'block' : 'none'" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Nouvelle Action</h5>
+        <button type="button" class="btn-close" (click)="closeAddActionModal()"></button>
+      </div>
+      <div class="modal-body">
+        <form>
+          <div class="row">
+            <!-- Left Column -->
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label class="form-label">Thème <span class="text-danger">*</span></label>
+                <input
+                  type="text"
+                  class="form-control"
+                  [class.is-invalid]="formErrors()['theme']"
+                  placeholder="Thématique principale du PDCA"
+                  [(ngModel)]="newAction().theme"
+                  name="theme"
+                  title="Thématique principale du PDCA">
+                <div class="invalid-feedback d-block" *ngIf="formErrors()['theme']">
+                  {{ formErrors()['theme'] }}
+                </div>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">IMME/CORR <span class="text-danger">*</span></label>
+                <select class="form-select" [class.is-invalid]="formErrors()['immeCorr']" [(ngModel)]="newAction().immeCorr" name="immeCorr" title="Immédiate : Éliminer le défaut / Corrective : Éliminer la cause">
+                  <option value="">Sélectionner</option>
+                  <option value="Immédiate">Immédiate</option>
+                  <option value="Corrective">Corrective</option>
+                </select>
+                <div class="invalid-feedback d-block" *ngIf="formErrors()['immeCorr']">
+                  {{ formErrors()['immeCorr'] }}
+                </div>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Cause <span class="text-danger">*</span></label>
+                <input
+                  type="text"
+                  class="form-control"
+                  [class.is-invalid]="formErrors()['cause']"
+                  placeholder="Veuillez saisir une seule Cause!"
+                  [(ngModel)]="newAction().cause"
+                  name="cause">
+                <div class="invalid-feedback d-block" *ngIf="formErrors()['cause']">
+                  {{ formErrors()['cause'] }}
+                </div>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Responsable <span class="text-danger">*</span></label>
+                <select class="form-select" [class.is-invalid]="formErrors()['responsable']" [(ngModel)]="newAction().responsable" name="responsable">
+                  <option value="">Sélectionner un responsable</option>
+                  <option *ngFor="let emp of employees" [value]="emp.name">{{ emp.name }}</option>
+                </select>
+                <div class="invalid-feedback d-block" *ngIf="formErrors()['responsable']">
+                  {{ formErrors()['responsable'] }}
+                </div>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Commentaire</label>
+                <textarea
+                  class="form-control"
+                  rows="3"
+                  placeholder="Description détaillée"
+                  [(ngModel)]="newAction().commentaire"
+                  name="commentaire"
+                  title="Description détaillée"></textarea>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Délai de vérification <span class="text-danger">*</span></label>
+                <input
+                  type="date"
+                  class="form-control"
+                  [class.is-invalid]="formErrors()['delai']"
+                  [(ngModel)]="newAction().delai"
+                  name="delai"
+                  title="Date limite pour vérifier l'efficacité">
+                <div class="invalid-feedback d-block" *ngIf="formErrors()['delai']">
+                  {{ formErrors()['delai'] }}
+                </div>
+              </div>
+            </div>
+
+            <!-- Right Column -->
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label class="form-label">Anomalie/Amélioration <span class="text-danger">*</span></label>
+                <input
+                  type="text"
+                  class="form-control"
+                  [class.is-invalid]="formErrors()['anomAmel']"
+                  placeholder="Type d'objectif"
+                  [(ngModel)]="newAction().anomAmel"
+                  name="anomAmel"
+                  title="Type d'objectif">
+                <div class="invalid-feedback d-block" *ngIf="formErrors()['anomAmel']">
+                  {{ formErrors()['anomAmel'] }}
+                </div>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Criticité <span class="text-danger">*</span></label>
+                <select class="form-select" [class.is-invalid]="formErrors()['criticite']" [(ngModel)]="newAction().criticite" name="criticite" title="Mineure : Non-conformité sans impact / Majeure : Impact potentiel / Critique : Impact client">
+                  <option value="">Sélectionner</option>
+                  <option value="Mineure">Mineure</option>
+                  <option value="Majeure">Majeure</option>
+                  <option value="Critique">Critique</option>
+                </select>
+                <div class="invalid-feedback d-block" *ngIf="formErrors()['criticite']">
+                  {{ formErrors()['criticite'] }}
+                </div>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Action <span class="text-danger">*</span></label>
+                <input
+                  type="text"
+                  class="form-control"
+                  [class.is-invalid]="formErrors()['action']"
+                  placeholder="Veuillez saisir une seule Action!"
+                  [(ngModel)]="newAction().action"
+                  name="action"
+                  title="Description détaillée">
+                <div class="invalid-feedback d-block" *ngIf="formErrors()['action']">
+                  {{ formErrors()['action'] }}
+                </div>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Délai <span class="text-danger">*</span></label>
+                <input
+                  type="date"
+                  class="form-control"
+                  [class.is-invalid]="formErrors()['delai']"
+                  [(ngModel)]="newAction().delai"
+                  name="delai"
+                  title="Date limite de réalisation">
+                <div class="invalid-feedback d-block" *ngIf="formErrors()['delai']">
+                  {{ formErrors()['delai'] }}
+                </div>
+              </div>
+              <div class="mb-3">
+                <label class="form-label">Méthode Mesure d'Efficacité <span class="text-danger">*</span></label>
+                <select class="form-select" [class.is-invalid]="formErrors()['methodeEfficacite']" [(ngModel)]="newAction().methodeEfficacite" name="methodeEfficacite" title="Comment sera mesurée l'efficacité">
+                  <option value="">Sélectionner</option>
+                  <option value="Indicateur">Indicateur</option>
+                  <option value="Audit">Audit</option>
+                  <option value="Autre">Autre</option>
+                </select>
+                <div class="invalid-feedback d-block" *ngIf="formErrors()['methodeEfficacite']">
+                  {{ formErrors()['methodeEfficacite'] }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeAddActionModal()">
+          Annuler
+        </button>
+        <button type="button" class="btn btn-primary" (click)="addNewAction()">
+          <i class="feather icon-check"></i> Ajouter
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal for Documents -->
+<div class="modal fade" [class.show]="showDocumentsModal()" [style.display]="showDocumentsModal() ? 'block' : 'none'" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Gestion Documents</h5>
+        <button type="button" class="btn-close" (click)="closeDocumentsModal()"></button>
+      </div>
+      <div class="modal-body">
+        <div class="list-group">
+          <a href="#" class="list-group-item list-group-item-action">
+            <div class="d-flex w-100 justify-content-between">
+              <h6 class="mb-1"><i class="feather icon-file-text"></i> Plan d'action - v1.0</h6>
+              <small>15/02/2026</small>
+            </div>
+            <p class="mb-1">Document principal du plan</p>
+          </a>
+          <a href="#" class="list-group-item list-group-item-action">
+            <div class="d-flex w-100 justify-content-between">
+              <h6 class="mb-1"><i class="feather icon-file-text"></i> Analyse des causes</h6>
+              <small>18/02/2026</small>
+            </div>
+            <p class="mb-1">Analyse détaillée des causes racines</p>
+          </a>
+          <a href="#" class="list-group-item list-group-item-action">
+            <div class="d-flex w-100 justify-content-between">
+              <h6 class="mb-1"><i class="feather icon-file-text"></i> Résultats vérification</h6>
+              <small>24/02/2026</small>
+            </div>
+            <p class="mb-1">Résultats de la vérification d'efficacité</p>
+          </a>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeDocumentsModal()">
+          Fermer
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal for Action Detail -->
+<div class="modal fade" [class.show]="showActionDetailModal()" [style.display]="showActionDetailModal() ? 'block' : 'none'" tabindex="-1">
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content">
+      <div class="modal-header bg-light">
+        <div>
+          <h5 class="modal-title mb-1">Détail Action #{{ selectedActionDetail()?.id }}</h5>
+          <small class="text-muted">{{ selectedActionDetail()?.theme }}</small>
+        </div>
+        <button type="button" class="btn-close" (click)="closeActionDetail()"></button>
+      </div>
+      <div class="modal-body" *ngIf="selectedActionDetail()">
+        <!-- Section 1: Information de base -->
+        <div class="card mb-3">
+          <div class="card-header bg-primary text-white">
+            <h6 class="mb-0"><i class="feather icon-info"></i> Information de base</h6>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label class="form-label text-muted">Thème</label>
+                  <p class="fw-bold">{{ selectedActionDetail()?.theme }}</p>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label text-muted">Anomalie/Amélioration</label>
+                  <p><span class="badge badge-light-warning">{{ selectedActionDetail()?.anomAmel }}</span></p>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label text-muted">IMME/CORR</label>
+                  <p><span class="badge badge-light-info">{{ selectedActionDetail()?.immeCorr }}</span></p>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label class="form-label text-muted">Criticité</label>
+                  <p>
+                    <span class="badge criticite-badge"
+                          [class.criticite-critique]="selectedActionDetail()?.criticite === 'Critique'"
+                          [class.criticite-majeure]="selectedActionDetail()?.criticite === 'Majeure'"
+                          [class.criticite-mineure]="selectedActionDetail()?.criticite === 'Mineure'">
+                      {{ selectedActionDetail()?.criticite }}
+                    </span>
+                  </p>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label text-muted">Rédacteur</label>
+                  <p class="fw-bold">{{ selectedActionDetail()?.redacteur }}</p>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label text-muted">Date de création</label>
+                  <p>{{ selectedActionDetail()?.date }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 2: Cause et Action -->
+        <div class="card mb-3">
+          <div class="card-header bg-success text-white">
+            <h6 class="mb-0"><i class="feather icon-target"></i> Cause et Action</h6>
+          </div>
+          <div class="card-body">
+            <div class="mb-3">
+              <label class="form-label text-muted">Cause</label>
+              <p class="fw-bold">{{ selectedActionDetail()?.cause }}</p>
+            </div>
+            <div class="mb-3">
+              <label class="form-label text-muted">Action à mettre en place</label>
+              <p class="fw-bold">{{ selectedActionDetail()?.action }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 3: Responsabilité et Délai -->
+        <div class="card mb-3">
+          <div class="card-header bg-warning text-dark">
+            <h6 class="mb-0"><i class="feather icon-user"></i> Responsabilité et Délai</h6>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label class="form-label text-muted">Responsable</label>
+                  <p class="fw-bold">{{ selectedActionDetail()?.responsable }}</p>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label class="form-label text-muted">Délai de réalisation</label>
+                  <p class="fw-bold">{{ selectedActionDetail()?.delai }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 4: Vérification -->
+        <div class="card mb-3">
+          <div class="card-header bg-info text-white">
+            <h6 class="mb-0"><i class="feather icon-check-circle"></i> Vérification</h6>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label class="form-label text-muted">Date réalisée</label>
+                  <p class="fw-bold">{{ selectedActionDetail()?.dateRealisee || '-' }}</p>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label text-muted">Méthode de vérification</label>
+                  <p class="fw-bold">{{ selectedActionDetail()?.methodeVerification }}</p>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label class="form-label text-muted">Date prévue de vérification</label>
+                  <p class="fw-bold">{{ selectedActionDetail()?.datePreveueVerification }}</p>
+                </div>
+                <div class="mb-3">
+                  <label class="form-label text-muted">Date de vérification</label>
+                  <p class="fw-bold">{{ selectedActionDetail()?.dateVerification || '-' }}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 5: Efficacité -->
+        <div class="card mb-3">
+          <div class="card-header bg-danger text-white">
+            <h6 class="mb-0"><i class="feather icon-trending-up"></i> Efficacité</h6>
+          </div>
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label class="form-label text-muted">Efficacité</label>
+                  <p><span class="badge badge-light-success">{{ selectedActionDetail()?.efficacite }}</span></p>
+                </div>
+              </div>
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <label class="form-label text-muted">Méthode de mesure d'efficacité</label>
+                  <p><span class="badge badge-light-primary">{{ selectedActionDetail()?.methodeEfficacite }}</span></p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Section 6: Commentaire -->
+        <div class="card">
+          <div class="card-header bg-secondary text-white">
+            <h6 class="mb-0"><i class="feather icon-message-square"></i> Commentaire</h6>
+          </div>
+          <div class="card-body">
+            <p class="text-muted">{{ selectedActionDetail()?.commentaire || 'Aucun commentaire' }}</p>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="closeActionDetail()">
+          Fermer
+        </button>
+      </div>
+    </div>
   </div>
 </div>
 
