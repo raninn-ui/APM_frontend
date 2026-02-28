@@ -18,6 +18,46 @@ interface ActionFile {
   uploadDate: string;
 }
 
+// Action interface from Plans d'Action
+interface ActionFromPlan {
+  id: number;
+  redacteur: string;
+  theme: string;
+  date: string;
+  anomAmel: string;
+  immeCorr: string;
+  criticite: string;
+  cause: string;
+  action: string;
+  responsable: string;
+  delai: string;
+  dateRealisee: string;
+  methodeVerification: string;
+  datePreveueVerification: string;
+  dateVerification: string;
+  efficacite: string;
+  methodeEfficacite: string;
+  commentaire: string;
+  state: 'P' | 'D' | 'C';
+  closureComment?: string;
+  efficacyRating?: number;
+  comments?: Comment[];
+  isRejected?: boolean;
+}
+
+interface ActionPlan {
+  id: number;
+  title: string;
+  pilots: string[];
+  process: string;
+  creationDate: string;
+  modificationDate?: string;
+  type: 'Mono-Pilote' | 'Multi-Pilote';
+  status?: string;
+  actions?: ActionFromPlan[];
+}
+
+// Transformed Action for Mes Actions display
 interface Action {
   id: number;
   title: string;
@@ -78,267 +118,156 @@ export class MesActionsComponent implements OnInit {
   // Current user
   currentUser = 'Ahmed Benali';
 
-  // Mock data
-  actions = signal<Action[]>([
+  // Action Plans data (same as in action-plans component)
+  actionPlans = signal<ActionPlan[]>([
     {
       id: 1,
-      title: 'Ameliorer la documentation des processus',
-      planName: 'Plan Qualite 2026',
-      state: 'P',
-      deadline: '2026-03-15',
-      responsable: 'Ahmed Benali',
-      pilote: 'GRITL Walid',
-      theme: 'Documentation',
-      prevCorr: 'Preventive',
-      anomAmel: 'Amelioration',
-      dateCreation: '2026-02-01',
-      criticite: 'Haute',
-      efficacite: 'N/A',
-      description: 'Documenter tous les processus critiques de production',
-      cause: 'Manque de documentation standardisee',
-      commentaire: 'Action prioritaire pour Q1',
-      files: [
-        { id: 1, name: 'template_doc.docx', description: 'Template de documentation', uploadDate: '2026-02-15' }
-      ],
-      comments: [
-        { id: 1, author: 'Ahmed Benali', text: 'Action creee', timestamp: '2026-02-01 10:30', type: 'state_change' }
+      title: 'Améliorer la performance',
+      pilots: ['GRITL Walid'],
+      process: 'Gestion des Opérations',
+      creationDate: '15/02/2026',
+      type: 'Mono-Pilote',
+      status: 'Modifié',
+      actions: [
+        {
+          id: 1,
+          redacteur: 'GRITL Walid',
+          theme: 'Optimisation des processus',
+          date: '15/02/2026',
+          anomAmel: 'Amélioration',
+          immeCorr: 'Immédiat',
+          criticite: 'Critique',
+          cause: 'Processus inefficace',
+          action: 'Analyser et optimiser le flux de travail',
+          responsable: 'Ahmed Benali',
+          delai: '20/02/2026',
+          dateRealisee: '',
+          methodeVerification: '',
+          datePreveueVerification: '',
+          dateVerification: '',
+          efficacite: '',
+          methodeEfficacite: '',
+          commentaire: 'Action en cours',
+          state: 'P',
+          comments: [
+            {
+              id: 1,
+              author: 'GRITL Walid',
+              text: 'Action créée',
+              timestamp: '15/02/2026 10:00',
+              type: 'state_change'
+            }
+          ]
+        }
       ]
     },
     {
       id: 2,
-      title: 'Reduire les delais de traitement',
-      planName: 'Plan Operations 2026',
-      state: 'D',
-      deadline: '2026-02-28',
-      responsable: 'Fatima Zahra',
-      pilote: 'Ahmed Benali',
-      theme: 'Efficacite',
-      prevCorr: 'Corrective',
-      anomAmel: 'Amelioration',
-      dateCreation: '2026-01-15',
-      criticite: 'Moyenne',
-      efficacite: 'N/A',
-      description: 'Optimiser les workflows de production pour reduire les delais',
-      cause: 'Processus inefficaces et goulots d\'etranglement',
-      commentaire: 'En cours de realisation - resultats positifs',
-      dateRealisee: '2026-02-25',
-      commentaireClosture: 'Realise avec succes - reduction de 15% des delais',
-      methodVerification: 'Tests de performance et mesure des KPIs',
-      files: [
-        { id: 2, name: 'rapport_optimisation.pdf', description: 'Rapport d\'optimisation', uploadDate: '2026-02-25' },
-        { id: 3, name: 'metriques_performance.xlsx', description: 'Metriques de performance', uploadDate: '2026-02-26' }
-      ],
-      comments: [
-        { id: 1, author: 'Fatima Zahra', text: 'Action demarree', timestamp: '2026-01-15 09:00', type: 'state_change' },
-        { id: 2, author: 'Ahmed Benali', text: 'Premiers resultats encourageants', timestamp: '2026-02-20 14:30', type: 'comment' },
-        { id: 3, author: 'Fatima Zahra', text: 'Action clôturee - objectifs atteints', timestamp: '2026-02-25 16:45', type: 'state_change' }
+      title: 'Mise à jour de la documentation',
+      pilots: ['GRITL Walid', 'Ahmed Benali', 'Fatima Zahra'],
+      process: 'Gestion de la Qualité',
+      creationDate: '10/02/2026',
+      type: 'Multi-Pilote',
+      status: 'Modifié',
+      actions: [
+        {
+          id: 3,
+          redacteur: 'Fatima Zahra',
+          theme: 'Documentation qualité',
+          date: '10/02/2026',
+          anomAmel: 'Anomalie',
+          immeCorr: 'Immédiat',
+          criticite: 'Critique',
+          cause: 'Documentation obsolète',
+          action: 'Mettre à jour tous les documents',
+          responsable: 'Leila Mansouri',
+          delai: '28/02/2026',
+          dateRealisee: '22/02/2026',
+          methodeVerification: 'Revue documentaire',
+          datePreveueVerification: '01/03/2026',
+          dateVerification: '28/02/2026',
+          efficacite: 'Efficace',
+          methodeEfficacite: 'Indicateur',
+          commentaire: '',
+          state: 'C',
+          comments: [
+            {
+              id: 1,
+              author: 'Fatima Zahra',
+              text: 'Action créée',
+              timestamp: '10/02/2026 09:00',
+              type: 'state_change'
+            },
+            {
+              id: 2,
+              author: 'Leila Mansouri',
+              text: 'Action clôturée - Documentation mise à jour',
+              timestamp: '22/02/2026 16:30',
+              type: 'state_change'
+            },
+            {
+              id: 3,
+              author: 'GRITL Walid',
+              text: 'Action vérifiée - Efficacité: Efficace',
+              timestamp: '28/02/2026 10:00',
+              type: 'state_change'
+            }
+          ]
+        }
       ]
     },
     {
       id: 3,
-      title: 'Former l\'equipe aux nouveaux outils',
-      planName: 'Plan RH 2026',
-      state: 'C',
-      deadline: '2026-02-20',
-      responsable: 'Mohamed Karim',
-      pilote: 'GRITL Walid',
-      theme: 'Formation',
-      prevCorr: 'Preventive',
-      anomAmel: 'Amelioration',
-      dateCreation: '2026-01-10',
-      criticite: 'Basse',
-      efficacite: '4',
-      description: 'Sessions de formation pour tous les employes sur les nouveaux outils',
-      cause: 'Adoption de nouveaux outils et systemes',
-      commentaire: 'Formation completee avec succes',
-      dateRealisee: '2026-02-18',
-      commentaireClosture: 'Formation reussie - 95% de participation',
-      methodVerification: 'Evaluation des participants et tests pratiques',
-      dateVerification: '2026-02-20',
-      efficacityRating: 4,
-      files: [
-        { id: 4, name: 'slides_formation.pptx', description: 'Slides de formation', uploadDate: '2026-02-18' },
-        { id: 5, name: 'resultats_evaluation.pdf', description: 'Resultats d\'evaluation', uploadDate: '2026-02-20' }
-      ],
-      comments: [
-        { id: 1, author: 'Mohamed Karim', text: 'Formation demarree', timestamp: '2026-01-10 08:00', type: 'state_change' },
-        { id: 2, author: 'Mohamed Karim', text: 'Sessions completees avec succes', timestamp: '2026-02-18 17:00', type: 'state_change' },
-        { id: 3, author: 'GRITL Walid', text: 'Verification effectuee - action validee', timestamp: '2026-02-20 15:30', type: 'state_change' }
-      ]
-    },
-    {
-      id: 4,
-      title: 'Mettre en place un systeme de monitoring',
-      planName: 'Plan Qualite 2026',
-      state: 'P',
-      deadline: '2026-03-01',
-      responsable: 'Leila Mansouri',
-      pilote: 'Ahmed Benali',
-      theme: 'Monitoring',
-      prevCorr: 'Preventive',
-      anomAmel: 'Amelioration',
-      dateCreation: '2026-02-05',
-      criticite: 'Haute',
-      efficacite: 'N/A',
-      description: 'Installer les outils de monitoring en temps reel pour tous les processus critiques',
-      cause: 'Besoin de visibilite et de traçabilite des operations',
-      commentaire: 'Urgent - impact sur la qualite',
-      files: [],
-      comments: [
-        { id: 1, author: 'Leila Mansouri', text: 'Action creee', timestamp: '2026-02-05 11:00', type: 'state_change' }
-      ]
-    },
-    {
-      id: 5,
-      title: 'Audit de conformite',
-      planName: 'Plan Conformite 2026',
-      state: 'D',
-      deadline: '2026-02-15',
-      responsable: 'Hassan Bouali',
-      pilote: 'GRITL Walid',
-      theme: 'Conformite',
-      prevCorr: 'Corrective',
-      anomAmel: 'Anomalie',
-      dateCreation: '2026-01-20',
-      criticite: 'Haute',
-      efficacite: 'N/A',
-      description: 'Effectuer audit complet de conformite reglementaire',
-      cause: 'Verification reglementaire obligatoire',
-      commentaire: 'En cours - audit externe en cours',
-      dateRealisee: '2026-02-14',
-      commentaireClosture: 'Audit realise - resultats en attente',
-      methodVerification: 'Verification documentaire et audit externe',
-      files: [
-        { id: 6, name: 'checklist_audit.xlsx', description: 'Checklist d\'audit', uploadDate: '2026-02-10' }
-      ],
-      comments: [
-        { id: 1, author: 'Hassan Bouali', text: 'Audit demarree', timestamp: '2026-01-20 09:30', type: 'state_change' },
-        { id: 2, author: 'Hassan Bouali', text: 'Audit realise - en attente des resultats', timestamp: '2026-02-14 17:00', type: 'state_change' }
-      ]
-    },
-    {
-      id: 6,
-      title: 'Optimiser les couts d\'exploitation',
-      planName: 'Plan Operations 2026',
-      state: 'P',
-      deadline: '2026-02-10',
-      responsable: 'Nadia Saidani',
-      pilote: 'Ahmed Benali',
-      theme: 'Couts',
-      prevCorr: 'Corrective',
-      anomAmel: 'Amelioration',
-      dateCreation: '2026-01-25',
-      criticite: 'Moyenne',
-      efficacite: 'N/A',
-      description: 'Reduire les depenses d\'exploitation de 10% sans impacter la qualite',
-      cause: 'Optimisation budgetaire et reduction des couts',
-      commentaire: 'A demarrer - analyse en cours',
-      files: [],
-      comments: [
-        { id: 1, author: 'Nadia Saidani', text: 'Action creee', timestamp: '2026-01-25 10:00', type: 'state_change' }
-      ]
-    },
-    {
-      id: 7,
-      title: 'Implémenter un système ERP',
-      planName: 'Plan Informatique 2026',
-      state: 'P',
-      deadline: '2026-04-30',
-      responsable: 'Karim Tounsi',
-      pilote: 'GRITL Walid',
-      theme: 'Informatique',
-      prevCorr: 'Preventive',
-      anomAmel: 'Amelioration',
-      dateCreation: '2026-02-01',
-      criticite: 'Haute',
-      efficacite: 'N/A',
-      description: 'Deployer un nouveau système ERP pour tous les departements',
-      cause: 'Modernisation des systèmes informatiques',
-      commentaire: 'Projet strategique - phase de planification',
-      files: [],
-      comments: [
-        { id: 1, author: 'Karim Tounsi', text: 'Action creee', timestamp: '2026-02-01 09:00', type: 'state_change' }
-      ]
-    },
-    {
-      id: 8,
-      title: 'Audit de sécurité informatique',
-      planName: 'Plan Informatique 2026',
-      state: 'D',
-      deadline: '2026-03-15',
-      responsable: 'Salim Bouazza',
-      pilote: 'Ahmed Benali',
-      theme: 'Securite',
-      prevCorr: 'Preventive',
-      anomAmel: 'Anomalie',
-      dateCreation: '2026-01-30',
-      criticite: 'Haute',
-      efficacite: 'N/A',
-      description: 'Effectuer un audit complet de la sécurité informatique',
-      cause: 'Conformité aux normes de sécurité ISO 27001',
-      commentaire: 'Audit en cours - resultats preliminaires positifs',
-      dateRealisee: '2026-03-10',
-      commentaireClosture: 'Audit realise - rapport en preparation',
-      methodVerification: 'Audit externe par cabinet specialise',
-      files: [
-        { id: 7, name: 'rapport_audit_preliminaire.pdf', description: 'Rapport preliminaire', uploadDate: '2026-03-10' }
-      ],
-      comments: [
-        { id: 1, author: 'Salim Bouazza', text: 'Audit demarree', timestamp: '2026-01-30 10:00', type: 'state_change' },
-        { id: 2, author: 'Salim Bouazza', text: 'Audit realise avec succes', timestamp: '2026-03-10 17:00', type: 'state_change' }
-      ]
-    },
-    {
-      id: 9,
-      title: 'Améliorer la sécurité au travail',
-      planName: 'Plan Sante Securite 2026',
-      state: 'P',
-      deadline: '2026-03-30',
-      responsable: 'Amina Belkaid',
-      pilote: 'GRITL Walid',
-      theme: 'Sante Securite',
-      prevCorr: 'Preventive',
-      anomAmel: 'Amelioration',
-      dateCreation: '2026-02-10',
-      criticite: 'Haute',
-      efficacite: 'N/A',
-      description: 'Mettre en place des mesures de sécurité renforcées dans tous les ateliers',
-      cause: 'Reduction des accidents du travail',
-      commentaire: 'Action prioritaire - impact sur la sante des employes',
-      files: [],
-      comments: [
-        { id: 1, author: 'Amina Belkaid', text: 'Action creee', timestamp: '2026-02-10 08:30', type: 'state_change' }
-      ]
-    },
-    {
-      id: 10,
-      title: 'Certification ISO 9001',
-      planName: 'Plan Qualite 2026',
-      state: 'D',
-      deadline: '2026-05-31',
-      responsable: 'Rachid Mansouri',
-      pilote: 'Ahmed Benali',
-      theme: 'Qualite',
-      prevCorr: 'Preventive',
-      anomAmel: 'Amelioration',
-      dateCreation: '2026-01-05',
-      criticite: 'Haute',
-      efficacite: 'N/A',
-      description: 'Obtenir la certification ISO 9001 pour le systeme de management de la qualite',
-      cause: 'Exigence client et amelioration continue',
-      commentaire: 'Audit de certification en cours - resultats attendus en mai',
-      dateRealisee: '2026-05-15',
-      commentaireClosture: 'Certification obtenue avec succes',
-      methodVerification: 'Audit de certification par organisme accrédité',
-      files: [
-        { id: 8, name: 'certificat_iso_9001.pdf', description: 'Certificat ISO 9001', uploadDate: '2026-05-31' }
-      ],
-      comments: [
-        { id: 1, author: 'Rachid Mansouri', text: 'Processus de certification demarree', timestamp: '2026-01-05 09:00', type: 'state_change' },
-        { id: 2, author: 'Rachid Mansouri', text: 'Audit de certification realise', timestamp: '2026-05-15 16:00', type: 'state_change' }
+      title: 'Formation de l\'équipe',
+      pilots: ['GRITL Walid'],
+      process: 'Gestion des Ressources Humaines',
+      creationDate: '05/02/2026',
+      type: 'Mono-Pilote',
+      status: 'Modifié',
+      actions: [
+        {
+          id: 4,
+          redacteur: 'GRITL Walid',
+          theme: 'Formation RH',
+          date: '05/02/2026',
+          anomAmel: 'Amélioration',
+          immeCorr: 'Immédiat',
+          criticite: 'Haute',
+          cause: 'Besoin de formation',
+          action: 'Organiser sessions de formation',
+          responsable: 'Mohamed Karim',
+          delai: '15/03/2026',
+          dateRealisee: '10/03/2026',
+          methodeVerification: 'Évaluation des participants',
+          datePreveueVerification: '15/03/2026',
+          dateVerification: '15/03/2026',
+          efficacite: 'Très efficace',
+          methodeEfficacite: 'Feedback',
+          commentaire: 'Formation réussie',
+          state: 'D',
+          comments: [
+            {
+              id: 1,
+              author: 'GRITL Walid',
+              text: 'Action créée',
+              timestamp: '05/02/2026 09:00',
+              type: 'state_change'
+            },
+            {
+              id: 2,
+              author: 'Mohamed Karim',
+              text: 'Formation réalisée avec succès',
+              timestamp: '10/03/2026 17:00',
+              type: 'state_change'
+            }
+          ]
+        }
       ]
     }
   ]);
+
+  // Transformed actions from plans
+  actions = signal<Action[]>([]);
 
   // Computed filtered and sorted actions
   filteredActions = computed(() => {
@@ -357,10 +286,63 @@ export class MesActionsComponent implements OnInit {
   });
 
   ngOnInit() {
+    // Transform actions from plans
+    this.transformActionsFromPlans();
+
     // Initialize with first action selected
     if (this.actions().length > 0) {
       this.selectedAction.set(this.actions()[0]);
     }
+  }
+
+  // Transform actions from ActionPlan format to Action format
+  transformActionsFromPlans() {
+    const transformedActions: Action[] = [];
+
+    this.actionPlans().forEach(plan => {
+      if (plan.actions && plan.actions.length > 0) {
+        plan.actions.forEach(planAction => {
+          const transformedAction: Action = {
+            id: planAction.id,
+            title: planAction.action,
+            planName: plan.title,
+            state: planAction.state,
+            deadline: this.convertDateFormat(planAction.delai),
+            responsable: planAction.responsable,
+            pilote: plan.pilots[0] || 'N/A',
+            theme: planAction.theme,
+            prevCorr: planAction.immeCorr === 'Immédiat' ? 'Preventive' : 'Corrective',
+            anomAmel: planAction.anomAmel,
+            dateCreation: this.convertDateFormat(planAction.date),
+            criticite: planAction.criticite,
+            efficacite: planAction.efficacite || 'N/A',
+            description: planAction.action,
+            cause: planAction.cause,
+            commentaire: planAction.commentaire,
+            dateRealisee: planAction.dateRealisee ? this.convertDateFormat(planAction.dateRealisee) : undefined,
+            commentaireClosture: planAction.closureComment,
+            methodVerification: planAction.methodeVerification,
+            dateVerification: planAction.dateVerification ? this.convertDateFormat(planAction.dateVerification) : undefined,
+            efficacityRating: planAction.efficacyRating,
+            files: [],
+            comments: planAction.comments || []
+          };
+          transformedActions.push(transformedAction);
+        });
+      }
+    });
+
+    this.actions.set(transformedActions);
+  }
+
+  // Convert date from DD/MM/YYYY to YYYY-MM-DD
+  convertDateFormat(dateStr: string): string {
+    if (!dateStr) return '';
+    const parts = dateStr.split('/');
+    if (parts.length === 3) {
+      return `${parts[2]}-${parts[1]}-${parts[0]}`;
+    }
+    return dateStr;
   }
 
   selectAction(action: Action) {
