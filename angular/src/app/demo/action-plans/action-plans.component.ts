@@ -198,36 +198,6 @@ export class ActionPlansComponent {
               type: 'state_change'
             }
           ]
-        },
-        {
-          id: 2,
-          redacteur: 'Ahmed Benali',
-          theme: 'Formation équipe',
-          date: '16/02/2026',
-          anomAmel: 'Amélioration',
-          immeCorr: 'Court terme',
-          criticite: 'Majeure',
-          cause: 'Manque de compétences',
-          action: 'Organiser sessions de formation',
-          responsable: 'Fatima Zahra',
-          delai: '28/02/2026',
-          dateRealisee: '',
-          methodeVerification: 'Évaluation',
-          datePreveueVerification: '01/03/2026',
-          dateVerification: '',
-          efficacite: '',
-          methodeEfficacite: '',
-          commentaire: '',
-          state: 'P',
-          comments: [
-            {
-              id: 1,
-              author: 'Ahmed Benali',
-              text: 'Action créée',
-              timestamp: '16/02/2026 14:00',
-              type: 'state_change'
-            }
-          ]
         }
       ]
     },
@@ -294,7 +264,45 @@ export class ActionPlansComponent {
       creationDate: '05/02/2026',
       type: 'Mono-Pilote',
       status: 'Modifié',
-      actions: []
+      actions: [
+        {
+          id: 2,
+          redacteur: 'Ahmed Benali',
+          theme: 'Formation équipe',
+          date: '16/02/2026',
+          anomAmel: 'Amélioration',
+          immeCorr: 'Court terme',
+          criticite: 'Majeure',
+          cause: 'Manque de compétences',
+          action: 'Organiser sessions de formation',
+          responsable: 'Fatima Zahra',
+          delai: '28/02/2026',
+          dateRealisee: '25/02/2026',
+          methodeVerification: 'Évaluation',
+          datePreveueVerification: '01/03/2026',
+          dateVerification: '28/02/2026',
+          efficacite: 'Très efficace',
+          methodeEfficacite: 'Feedback',
+          commentaire: 'Formation réussie',
+          state: 'D',
+          comments: [
+            {
+              id: 1,
+              author: 'Ahmed Benali',
+              text: 'Action créée',
+              timestamp: '16/02/2026 14:00',
+              type: 'state_change'
+            },
+            {
+              id: 2,
+              author: 'Fatima Zahra',
+              text: 'Formation réalisée avec succès',
+              timestamp: '25/02/2026 17:00',
+              type: 'state_change'
+            }
+          ]
+        }
+      ]
     }
   ]);
 

@@ -226,21 +226,21 @@ export class MesActionsComponent implements OnInit {
       status: 'Modifié',
       actions: [
         {
-          id: 4,
-          redacteur: 'GRITL Walid',
-          theme: 'Formation RH',
-          date: '05/02/2026',
+          id: 2,
+          redacteur: 'Ahmed Benali',
+          theme: 'Formation équipe',
+          date: '16/02/2026',
           anomAmel: 'Amélioration',
-          immeCorr: 'Immédiat',
-          criticite: 'Haute',
-          cause: 'Besoin de formation',
+          immeCorr: 'Court terme',
+          criticite: 'Majeure',
+          cause: 'Manque de compétences',
           action: 'Organiser sessions de formation',
-          responsable: 'Mohamed Karim',
-          delai: '15/03/2026',
-          dateRealisee: '10/03/2026',
-          methodeVerification: 'Évaluation des participants',
-          datePreveueVerification: '15/03/2026',
-          dateVerification: '15/03/2026',
+          responsable: 'Fatima Zahra',
+          delai: '28/02/2026',
+          dateRealisee: '25/02/2026',
+          methodeVerification: 'Évaluation',
+          datePreveueVerification: '01/03/2026',
+          dateVerification: '28/02/2026',
           efficacite: 'Très efficace',
           methodeEfficacite: 'Feedback',
           commentaire: 'Formation réussie',
@@ -248,16 +248,16 @@ export class MesActionsComponent implements OnInit {
           comments: [
             {
               id: 1,
-              author: 'GRITL Walid',
+              author: 'Ahmed Benali',
               text: 'Action créée',
-              timestamp: '05/02/2026 09:00',
+              timestamp: '16/02/2026 14:00',
               type: 'state_change'
             },
             {
               id: 2,
-              author: 'Mohamed Karim',
+              author: 'Fatima Zahra',
               text: 'Formation réalisée avec succès',
-              timestamp: '10/03/2026 17:00',
+              timestamp: '25/02/2026 17:00',
               type: 'state_change'
             }
           ]
