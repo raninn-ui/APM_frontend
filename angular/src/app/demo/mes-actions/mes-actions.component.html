@@ -92,14 +92,11 @@
             </button>
             <span class="h5 d-inline">{{ selectedAction()!.title }}</span>
           </div>
-          <div>
-            <button class="btn btn-outline-warning btn-sm me-2">
-              <i class="feather icon-refresh-cw"></i> Reinitialiser validation
-            </button>
-            <button class="btn btn-outline-danger btn-sm">
-              <i class="feather icon-trash-2"></i> Reinitialiser tous
-            </button>
-          </div>
+          @if (selectedAction()!.state === 'C') {
+            <div class="badge bg-success">
+              <i class="feather icon-lock"></i> Mode Lecture Seule
+            </div>
+          }
         </div>
       </div>
     </div>
@@ -277,19 +274,21 @@
               <p class="text-muted">Aucun fichier annexe</p>
             }
 
-            <div class="border-top pt-3">
-              <h6 class="mb-3 small">Ajouter un fichier annexe</h6>
-              <div class="mb-2">
-                <input type="text" class="form-control form-control-sm"
-                       [(ngModel)]="fileDescription" placeholder="Description">
+            @if (selectedAction()!.state !== 'C') {
+              <div class="border-top pt-3">
+                <h6 class="mb-3 small">Ajouter un fichier annexe</h6>
+                <div class="mb-2">
+                  <input type="text" class="form-control form-control-sm"
+                         [(ngModel)]="fileDescription" placeholder="Description">
+                </div>
+                <div class="mb-2">
+                  <input type="file" class="form-control form-control-sm">
+                </div>
+                <button class="btn btn-sm btn-primary">
+                  <i class="feather icon-upload"></i> Telecharger
+                </button>
               </div>
-              <div class="mb-2">
-                <input type="file" class="form-control form-control-sm">
-              </div>
-              <button class="btn btn-sm btn-primary">
-                <i class="feather icon-upload"></i> Telecharger
-              </button>
-            </div>
+            }
           </div>
         </div>
       </div>
@@ -314,14 +313,22 @@
               }
             </div>
 
-            <div class="border-top pt-3">
-              <h6 class="mb-2 small">Ajouter un Commentaire</h6>
-              <textarea class="form-control form-control-sm mb-2" rows="2"
-                        [(ngModel)]="newComment" placeholder="Votre commentaire..."></textarea>
-              <button class="btn btn-sm btn-primary" (click)="addComment()">
-                <i class="feather icon-send"></i> Envoyer
-              </button>
-            </div>
+            @if (selectedAction()!.state !== 'C') {
+              <div class="border-top pt-3">
+                <h6 class="mb-2 small">Ajouter un Commentaire</h6>
+                <textarea class="form-control form-control-sm mb-2" rows="2"
+                          [(ngModel)]="newComment" placeholder="Votre commentaire..."></textarea>
+                <button class="btn btn-sm btn-primary" (click)="addComment()">
+                  <i class="feather icon-send"></i> Envoyer
+                </button>
+              </div>
+            } @else {
+              <div class="border-top pt-3">
+                <p class="text-muted small">
+                  <i class="feather icon-lock"></i> Cette action est en mode lecture seule
+                </p>
+              </div>
+            }
           </div>
         </div>
       </div>
