@@ -110,7 +110,7 @@ const routes: Routes = [
       },
       {
         path: 'mes-actions',
-        loadComponent: () => import('./demo/action-plans/action-plans.component').then((c) => c.ActionPlansComponent)
+        loadComponent: () => import('./demo/mes-actions/mes-actions.component').then((c) => c.MesActionsComponent)
       },
       {
         path: 'suivi-actions',

@@ -1,0 +1,277 @@
+<div class="container-fluid">
+  <div class="row h-100">
+    <!-- Sidebar Panel -->
+    <div class="col-lg-4 col-md-5 border-end">
+      <div class="card h-100 border-0 rounded-0">
+        <div class="card-header bg-light border-bottom">
+          <h5 class="mb-3">Mes Actions</h5>
+          
+          <!-- Filters -->
+          <div class="mb-3">
+            <label class="form-label small fw-bold">Filtrer par Etat</label>
+            <div class="btn-group w-100" role="group">
+              <input type="radio" class="btn-check" name="filter" id="filter-all" 
+                     [checked]="filterState() === 'all'" (change)="filterState.set('all')">
+              <label class="btn btn-outline-secondary btn-sm" for="filter-all">Tous</label>
+              
+              <input type="radio" class="btn-check" name="filter" id="filter-p" 
+                     [checked]="filterState() === 'P'" (change)="filterState.set('P')">
+              <label class="btn btn-outline-secondary btn-sm" for="filter-p">P</label>
+              
+              <input type="radio" class="btn-check" name="filter" id="filter-d" 
+                     [checked]="filterState() === 'D'" (change)="filterState.set('D')">
+              <label class="btn btn-outline-secondary btn-sm" for="filter-d">D</label>
+              
+              <input type="radio" class="btn-check" name="filter" id="filter-c" 
+                     [checked]="filterState() === 'C'" (change)="filterState.set('C')">
+              <label class="btn btn-outline-secondary btn-sm" for="filter-c">C</label>
+            </div>
+          </div>
+
+          <!-- Sort -->
+          <div>
+            <label class="form-label small fw-bold">Trier par</label>
+            <select class="form-select form-select-sm" [(ngModel)]="sortBy">
+              <option value="deadline">Deadline</option>
+              <option value="state">Etat</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Actions List -->
+        <div class="card-body p-0 overflow-y-auto" style="max-height: calc(100vh - 250px);">
+          @for (action of filteredActions(); track action.id) {
+            <div class="action-item p-3 border-bottom cursor-pointer" 
+                 [class.active]="selectedAction()?.id === action.id"
+                 (click)="selectAction(action)">
+              <div class="d-flex justify-content-between align-items-start mb-2">
+                <h6 class="mb-0 flex-grow-1">{{ action.title }}</h6>
+                <span class="badge" [ngClass]="'bg-' + getStateColor(action.state)">
+                  {{ action.state }}
+                </span>
+              </div>
+              <small class="text-muted d-block">{{ action.planName }}</small>
+              <small class="text-muted d-block">Responsable: {{ action.responsable }}</small>
+              <div class="mt-2">
+                <small [ngClass]="getDeadlineColor(action.deadline)">
+                  {{ action.deadline | date: 'dd/MM/yyyy' }}
+                </small>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Detail Page -->
+    <div class="col-lg-8 col-md-7">
+      @if (selectedAction()) {
+        <div class="card h-100 border-0 rounded-0">
+          <!-- Header -->
+          <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+            <div>
+              <button class="btn btn-sm btn-outline-light me-2" (click)="closeAction()">
+                Retour
+              </button>
+              <span class="ms-2">{{ selectedAction()!.title }}</span>
+            </div>
+            <div>
+              <button class="btn btn-sm btn-outline-warning me-2">Reinitialiser validation</button>
+              <button class="btn btn-sm btn-outline-danger">Reinitialiser tous</button>
+            </div>
+          </div>
+
+          <!-- Content -->
+          <div class="card-body overflow-y-auto" style="max-height: calc(100vh - 150px);">
+            <!-- Info Grid -->
+            <div class="row mb-4">
+              <div class="col-md-3">
+                <div class="info-box">
+                  <label class="form-label small fw-bold">Theme</label>
+                  <p class="mb-2">{{ selectedAction()!.theme }}</p>
+                  <label class="form-label small fw-bold">PREV/CORR</label>
+                  <p class="mb-2">{{ selectedAction()!.prevCorr }}</p>
+                  <label class="form-label small fw-bold">Anomalie/Amelio</label>
+                  <p>{{ selectedAction()!.anomAmel }}</p>
+                </div>
+              </div>
+              <div class="col-md-3">
+                <div class="info-box">
+                  <label class="form-label small fw-bold">Date creation</label>
+                  <p class="mb-2">{{ selectedAction()!.dateCreation | date: 'dd/MM/yyyy' }}</p>
+                  <label class="form-label small fw-bold">Criticite</label>
+                  <p class="mb-2">{{ selectedAction()!.criticite }}</p>
+                  <label class="form-label small fw-bold">Efficacite</label>
+                  <p>{{ selectedAction()!.efficacite }}</p>
+                </div>
+              </div>
+              <div class="col-md-3">
+                <div class="info-box">
+                  <label class="form-label small fw-bold">Responsable</label>
+                  <p class="mb-2">{{ selectedAction()!.responsable }}</p>
+                  <label class="form-label small fw-bold">Plan d'Action</label>
+                  <p class="mb-2">{{ selectedAction()!.planName }}</p>
+                  <label class="form-label small fw-bold">Cause</label>
+                  <p>{{ selectedAction()!.cause }}</p>
+                </div>
+              </div>
+              <div class="col-md-3">
+                <div class="info-box">
+                  <label class="form-label small fw-bold">Delai</label>
+                  <p class="mb-2">
+                    <span class="badge" [ngClass]="'bg-' + getStateColor(selectedAction()!.state)">
+                      {{ selectedAction()!.deadline | date: 'dd/MM/yyyy' }}
+                    </span>
+                  </p>
+                  <label class="form-label small fw-bold">Pilote</label>
+                  <p class="mb-2">{{ selectedAction()!.pilote }}</p>
+                  <label class="form-label small fw-bold">Etat</label>
+                  <div class="btn-group btn-group-sm" role="group">
+                    <button type="button" class="btn" 
+                            [ngClass]="selectedAction()!.state === 'P' ? 'btn-secondary' : 'btn-outline-secondary'">
+                      P
+                    </button>
+                    <button type="button" class="btn" 
+                            [ngClass]="selectedAction()!.state === 'D' ? 'btn-warning' : 'btn-outline-secondary'">
+                      D
+                    </button>
+                    <button type="button" class="btn" 
+                            [ngClass]="selectedAction()!.state === 'C' ? 'btn-success' : 'btn-outline-secondary'">
+                      C
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Realisation Section -->
+            <div class="card mb-4">
+              <div class="card-header bg-light">
+                <h6 class="mb-0">Realisation de l'Action</h6>
+              </div>
+              <div class="card-body">
+                @if (selectedAction()!.state === 'P') {
+                  <p class="text-muted mb-3">Cette action n'est pas encore realisee</p>
+                  <button class="btn btn-primary">Cloturer l'action</button>
+                } @else if (selectedAction()!.state === 'D') {
+                  <div class="row">
+                    <div class="col-md-6">
+                      <label class="form-label small fw-bold">Date de realisation</label>
+                      <p>{{ selectedAction()!.dateRealisee | date: 'dd/MM/yyyy' }}</p>
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label small fw-bold">Commentaire de cloture</label>
+                      <p>{{ selectedAction()!.commentaireClosture }}</p>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-md-6">
+                      <label class="form-label small fw-bold">Methode de verification</label>
+                      <p>{{ selectedAction()!.methodVerification }}</p>
+                    </div>
+                  </div>
+                } @else if (selectedAction()!.state === 'C') {
+                  <div class="alert alert-success mb-3">
+                    <strong>Action Verifiee</strong>
+                  </div>
+                  <div class="row">
+                    <div class="col-md-6">
+                      <label class="form-label small fw-bold">Date de realisation</label>
+                      <p>{{ selectedAction()!.dateRealisee | date: 'dd/MM/yyyy' }}</p>
+                    </div>
+                    <div class="col-md-6">
+                      <label class="form-label small fw-bold">Date de verification</label>
+                      <p>{{ selectedAction()!.dateVerification | date: 'dd/MM/yyyy' }}</p>
+                    </div>
+                  </div>
+                }
+              </div>
+            </div>
+
+            <!-- Files Section -->
+            <div class="card mb-4">
+              <div class="card-header bg-light">
+                <h6 class="mb-0">Fichiers Annexes</h6>
+              </div>
+              <div class="card-body">
+                @if (selectedAction()!.files && selectedAction()!.files!.length > 0) {
+                  <ul class="list-group mb-3">
+                    @for (file of selectedAction()!.files; track file.id) {
+                      <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                          <strong>{{ file.name }}</strong>
+                          <small class="d-block text-muted">{{ file.description }}</small>
+                        </div>
+                        <a href="#" class="btn btn-sm btn-outline-primary">Telecharger</a>
+                      </li>
+                    }
+                  </ul>
+                } @else {
+                  <p class="text-muted">Aucun fichier annexe</p>
+                }
+                
+                <div class="border-top pt-3">
+                  <h6 class="mb-3">Ajouter un fichier</h6>
+                  <div class="mb-2">
+                    <input type="text" class="form-control form-control-sm" placeholder="Description du fichier">
+                  </div>
+                  <div class="mb-2">
+                    <input type="file" class="form-control form-control-sm">
+                  </div>
+                  <button class="btn btn-sm btn-primary">Telecharger</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Comments Section -->
+            <div class="card">
+              <div class="card-header bg-light">
+                <h6 class="mb-0">Historique des Commentaires</h6>
+              </div>
+              <div class="card-body">
+                <div class="comments-list mb-3" style="max-height: 200px; overflow-y: auto;">
+                  @if (selectedAction()!.comments && selectedAction()!.comments!.length > 0) {
+                    @for (comment of selectedAction()!.comments; track comment.id) {
+                      <div class="comment-item mb-3 pb-3 border-bottom">
+                        <strong>{{ comment.author }}</strong>
+                        <small class="text-muted d-block">{{ comment.timestamp }}</small>
+                        <p class="mb-0 mt-1">{{ comment.text }}</p>
+                      </div>
+                    }
+                  } @else {
+                    <p class="text-muted">Aucun commentaire</p>
+                  }
+                </div>
+                
+                <div class="border-top pt-3">
+                  <h6 class="mb-2">Ajouter un commentaire</h6>
+                  <textarea class="form-control form-control-sm mb-2" rows="3" 
+                            placeholder="Votre commentaire..." [(ngModel)]="newComment"></textarea>
+                  <button class="btn btn-sm btn-primary">Envoyer</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      } @else {
+        <div class="card h-100 d-flex align-items-center justify-content-center">
+          <div class="text-center text-muted">
+            <p>Selectionnez une action pour voir les details</p>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+</div>
+
+<!-- Toast Notification -->
+@if (showToast()) {
+  <div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <div class="toast show" role="alert">
+      <div class="toast-body">
+        {{ toastMessage() }}
+      </div>
+    </div>
+  </div>
+}
+
