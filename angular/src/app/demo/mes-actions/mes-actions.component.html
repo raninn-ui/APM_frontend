@@ -207,6 +207,28 @@
                     <label class="form-label small fw-bold">Date de verification</label>
                     <input type="date" class="form-control" [(ngModel)]="verificationDate">
                   </div>
+                  <div class="mb-3">
+                    <label class="form-label small fw-bold">
+                      <span class="text-danger">*</span> Fichier de cloture (Obligatoire)
+                    </label>
+                    <div class="mb-2">
+                      <input type="text" class="form-control form-control-sm"
+                             [(ngModel)]="closureFileDescription" placeholder="Description du fichier">
+                    </div>
+                    <div class="mb-2">
+                      <input type="file" class="form-control form-control-sm"
+                             (change)="onClosureFileSelected($event)">
+                    </div>
+                    @if (closureFileInput()) {
+                      <small class="text-success">
+                        <i class="feather icon-check"></i> Fichier selectionnee: {{ closureFileInput()!.name }}
+                      </small>
+                    } @else {
+                      <small class="text-danger">
+                        <i class="feather icon-alert-circle"></i> Un fichier est requis
+                      </small>
+                    }
+                  </div>
                   <div class="d-flex gap-2">
                     <button class="btn btn-success btn-sm" (click)="saveClosure()">
                       <i class="feather icon-save"></i> Enregistrer

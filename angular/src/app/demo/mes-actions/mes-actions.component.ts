@@ -114,6 +114,9 @@ export class MesActionsComponent implements OnInit {
 
   // File upload
   fileDescription = signal('');
+  uploadedFiles = signal<ActionFile[]>([]);
+  closureFileInput = signal<File | null>(null);
+  closureFileDescription = signal('');
 
   // Current user
   currentUser = 'Ahmed Benali';
@@ -396,11 +399,39 @@ export class MesActionsComponent implements OnInit {
     this.verificationMethod.set('');
     this.verificationDate.set('');
     this.showClosureForm.set(false);
+    this.closureFileInput.set(null);
+    this.closureFileDescription.set('');
+  }
+
+  onClosureFileSelected(event: any) {
+    const file = event.target.files[0];
+    if (file) {
+      this.closureFileInput.set(file);
+    }
   }
 
   saveClosure() {
     const action = this.selectedAction();
     if (!action) return;
+
+    // Check if a file has been uploaded
+    if (!this.closureFileInput() && this.uploadedFiles().length === 0) {
+      this.showToastMessage('Un fichier doit être téléchargé pour clôturer l\'action', 'error');
+      return;
+    }
+
+    // If a new file is being uploaded, add it to the files list
+    if (this.closureFileInput()) {
+      const file = this.closureFileInput();
+      const newFile: ActionFile = {
+        id: (action.files?.length || 0) + 1,
+        name: file!.name,
+        description: this.closureFileDescription(),
+        uploadDate: new Date().toISOString().split('T')[0]
+      };
+      if (!action.files) action.files = [];
+      action.files.push(newFile);
+    }
 
     // Update action state and details
     action.state = 'D';
@@ -431,6 +462,8 @@ export class MesActionsComponent implements OnInit {
 
     this.selectedAction.set(action);
     this.resetClosureForm();
+    this.closureFileInput.set(null);
+    this.closureFileDescription.set('');
     this.showToastMessage('Action clôturee - Notification envoyee au pilote', 'success');
   }
 
