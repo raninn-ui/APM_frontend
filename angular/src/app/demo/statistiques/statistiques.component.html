@@ -1,0 +1,158 @@
+<div class="statistiques-container">
+  <!-- Statistics Pages Navigation -->
+  <div class="stat-pages-nav">
+    <div class="page-header">
+      <h1>Statistiques</h1>
+      <p class="text-muted">Sélectionnez une catégorie de statistiques</p>
+    </div>
+    
+    <div class="stat-cards-grid">
+      <!-- Statistique Mensuel -->
+      <a routerLink="/statistiques/mensuel" class="stat-card-link">
+        <div class="stat-card">
+          <div class="stat-card-icon">
+            <i class="feather icon-calendar"></i>
+          </div>
+          <div class="stat-card-content">
+            <h4>Statistique Mensuel</h4>
+            <p>Suivi mensuel des actions</p>
+          </div>
+          <div class="stat-card-arrow">
+            <i class="feather icon-chevron-right"></i>
+          </div>
+        </div>
+      </a>
+
+      <!-- Actions par Service -->
+      <a routerLink="/statistiques/actions-par-service" class="stat-card-link">
+        <div class="stat-card">
+          <div class="stat-card-icon">
+            <i class="feather icon-users"></i>
+          </div>
+          <div class="stat-card-content">
+            <h4>Actions par Service</h4>
+            <p>Répartition par service et responsable</p>
+          </div>
+          <div class="stat-card-arrow">
+            <i class="feather icon-chevron-right"></i>
+          </div>
+        </div>
+      </a>
+
+      <!-- Statistique Usine -->
+      <a routerLink="/statistiques/usine" class="stat-card-link">
+        <div class="stat-card">
+          <div class="stat-card-icon">
+            <i class="feather icon-home"></i>
+          </div>
+          <div class="stat-card-content">
+            <h4>Statistique Usine</h4>
+            <p>Vue globale de l'usine</p>
+          </div>
+          <div class="stat-card-arrow">
+            <i class="feather icon-chevron-right"></i>
+          </div>
+        </div>
+      </a>
+
+      <!-- Responsables -->
+      <a routerLink="/statistiques/responsables" class="stat-card-link">
+        <div class="stat-card">
+          <div class="stat-card-icon">
+            <i class="feather icon-user-check"></i>
+          </div>
+          <div class="stat-card-content">
+            <h4>Responsables</h4>
+            <p>Performance des responsables</p>
+          </div>
+          <div class="stat-card-arrow">
+            <i class="feather icon-chevron-right"></i>
+          </div>
+        </div>
+      </a>
+
+      <!-- Pilotes par Service -->
+      <a routerLink="/statistiques/pilotes-par-service" class="stat-card-link">
+        <div class="stat-card">
+          <div class="stat-card-icon">
+            <i class="feather icon-target"></i>
+          </div>
+          <div class="stat-card-content">
+            <h4>Pilotes par Service</h4>
+            <p>Suivi des pilotes</p>
+          </div>
+          <div class="stat-card-arrow">
+            <i class="feather icon-chevron-right"></i>
+          </div>
+        </div>
+      </a>
+
+      <!-- Efficacités par Employés -->
+      <a routerLink="/statistiques/efficacites-employes" class="stat-card-link">
+        <div class="stat-card">
+          <div class="stat-card-icon">
+            <i class="feather icon-trending-up"></i>
+          </div>
+          <div class="stat-card-content">
+            <h4>Efficacités par Employés</h4>
+            <p>Performance individuelle</p>
+          </div>
+          <div class="stat-card-arrow">
+            <i class="feather icon-chevron-right"></i>
+          </div>
+        </div>
+      </a>
+
+      <!-- Actions par Employés -->
+      <a routerLink="/statistiques/actions-employes" class="stat-card-link">
+        <div class="stat-card">
+          <div class="stat-card-icon">
+            <i class="feather icon-user"></i>
+          </div>
+          <div class="stat-card-content">
+            <h4>Actions par Employés</h4>
+            <p>Actions assignées par employé</p>
+          </div>
+          <div class="stat-card-arrow">
+            <i class="feather icon-chevron-right"></i>
+          </div>
+        </div>
+      </a>
+
+      <!-- Vérification -->
+      <a routerLink="/statistiques/verification" class="stat-card-link">
+        <div class="stat-card">
+          <div class="stat-card-icon">
+            <i class="feather icon-check-circle"></i>
+          </div>
+          <div class="stat-card-content">
+            <h4>Statistique des Vérification</h4>
+            <p>Suivi des vérifications</p>
+          </div>
+          <div class="stat-card-arrow">
+            <i class="feather icon-chevron-right"></i>
+          </div>
+        </div>
+      </a>
+
+      <!-- Responsables de Vérification -->
+      <a routerLink="/statistiques/responsables-verification" class="stat-card-link">
+        <div class="stat-card">
+          <div class="stat-card-icon">
+            <i class="feather icon-shield"></i>
+          </div>
+          <div class="stat-card-content">
+            <h4>Responsables de Vérification</h4>
+            <p>Performance des vérificateurs</p>
+          </div>
+          <div class="stat-card-arrow">
+            <i class="feather icon-chevron-right"></i>
+          </div>
+        </div>
+      </a>
+    </div>
+  </div>
+
+  <!-- Router Outlet for Child Routes -->
+  <router-outlet></router-outlet>
+</div>

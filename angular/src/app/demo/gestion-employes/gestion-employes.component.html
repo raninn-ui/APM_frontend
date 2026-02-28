@@ -1,0 +1,308 @@
+<div class="row">
+  <div class="col-xl-12">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h4>Gestion des Employés</h4>
+      <button class="btn btn-primary" (click)="openAddModal(addEmployeeModal)">
+        <i class="feather icon-plus"></i>
+        Ajouter un employé
+      </button>
+    </div>
+
+    <!-- Search Bar -->
+    <div class="row mb-4">
+      <div class="col-md-6">
+        <div class="input-group">
+          <span class="input-group-text"><i class="feather icon-search"></i></span>
+          <input 
+            type="text" 
+            class="form-control" 
+            placeholder="Rechercher par matricule..." 
+            [(ngModel)]="searchTerm"
+            (input)="searchEmployees()">
+        </div>
+      </div>
+    </div>
+
+    <!-- Employees Table -->
+    <app-card cardTitle="Liste des employés" blockClass="table-border-style">
+      <div class="table-responsive">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>Matricule</th>
+              <th>Nom</th>
+              <th>Prénom</th>
+              <th>Email</th>
+              <th>Responsabilité</th>
+              <th>Service</th>
+              <th>Type Accès</th>
+              <th>Session Windows</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (emp of filteredEmployees(); track emp.id) {
+            <tr>
+              <td><strong>{{ emp.matricule }}</strong></td>
+              <td>{{ emp.nom }}</td>
+              <td>{{ emp.prenom }}</td>
+              <td>{{ emp.email }}</td>
+              <td>
+                <span class="badge bg-primary">{{ emp.responsabilite }}</span>
+              </td>
+              <td>{{ emp.service }}</td>
+              <td>
+                <span [class]="'badge ' + (emp.typeAcces === 'Admin' ? 'bg-danger' : 'bg-info')">
+                  {{ emp.typeAcces }}
+                </span>
+              </td>
+              <td>
+                <span class="badge bg-secondary">{{ emp.sessionWindows }}</span>
+              </td>
+              <td>
+                <div class="d-flex gap-1">
+                  <button 
+                    class="btn btn-sm btn-info" 
+                    (click)="openEditModal(editEmployeeModal, emp)"
+                    title="Modifier">
+                    <i class="feather icon-edit"></i>
+                  </button>
+                  <button 
+                    class="btn btn-sm btn-danger" 
+                    (click)="deleteEmployee(emp.id)"
+                    title="Supprimer">
+                    <i class="feather icon-trash-2"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+            }
+            @if (filteredEmployees().length === 0) {
+            <tr>
+              <td colspan="9" class="text-center text-muted py-4">
+                Aucun employé trouvé.
+              </td>
+            </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </app-card>
+  </div>
+</div>
+
+<!-- Modal for Adding Employee -->
+<ng-template #addEmployeeModal let-modal>
+  <div class="modal-header">
+    <h5 class="modal-title">Ajouter un nouvel employé</h5>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    <form (ngSubmit)="addEmployee(modal)">
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label class="form-label">Matricule <span class="text-danger">*</span></label>
+          <input 
+            type="number" 
+            class="form-control" 
+            [(ngModel)]="newEmployee().matricule" 
+            name="matricule" 
+            required>
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">Nom <span class="text-danger">*</span></label>
+          <input 
+            type="text" 
+            class="form-control" 
+            [(ngModel)]="newEmployee().nom" 
+            name="nom" 
+            required>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label class="form-label">Prénom <span class="text-danger">*</span></label>
+          <input 
+            type="text" 
+            class="form-control" 
+            [(ngModel)]="newEmployee().prenom" 
+            name="prenom" 
+            required>
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">Email <span class="text-danger">*</span></label>
+          <input 
+            type="email" 
+            class="form-control" 
+            [(ngModel)]="newEmployee().email" 
+            name="email" 
+            required>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label class="form-label">Responsabilité</label>
+          <select 
+            class="form-select" 
+            [(ngModel)]="newEmployee().responsabilite" 
+            name="responsabilite">
+            <option value="">Sélectionner...</option>
+            @for (resp of responsabilites; track resp) {
+              <option [value]="resp">{{ resp }}</option>
+            }
+          </select>
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">Service</label>
+          <select 
+            class="form-select" 
+            [(ngModel)]="newEmployee().service" 
+            name="service">
+            <option value="">Sélectionner...</option>
+            @for (srv of services; track srv) {
+              <option [value]="srv">{{ srv }}</option>
+            }
+          </select>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label class="form-label">Type Accès</label>
+          <select 
+            class="form-select" 
+            [(ngModel)]="newEmployee().typeAcces" 
+            name="typeAcces">
+            <option value="">Sélectionner...</option>
+            @for (type of typeAccesOptions; track type) {
+              <option [value]="type">{{ type }}</option>
+            }
+          </select>
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">Session Windows</label>
+          <input 
+            type="text" 
+            class="form-control" 
+            [value]="newEmployee().matricule ? 'g' + newEmployee().matricule : ''" 
+            name="sessionWindows" 
+            readonly>
+          <small class="text-muted">Format: g + matricule</small>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="modal.dismiss()">
+          Annuler
+        </button>
+        <button type="submit" class="btn btn-primary">
+          <i class="feather icon-check"></i> Ajouter
+        </button>
+      </div>
+    </form>
+  </div>
+</ng-template>
+
+<!-- Modal for Editing Employee -->
+<ng-template #editEmployeeModal let-modal>
+  <div class="modal-header">
+    <h5 class="modal-title">Modifier l'employé</h5>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    @if (editingEmployee()) {
+    <form (ngSubmit)="updateEmployee(modal)">
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label class="form-label">Matricule</label>
+          <input 
+            type="number" 
+            class="form-control" 
+            [value]="editingEmployee()!.matricule" 
+            readonly>
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">Nom</label>
+          <input 
+            type="text" 
+            class="form-control" 
+            [value]="editingEmployee()!.nom" 
+            readonly>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label class="form-label">Prénom</label>
+          <input 
+            type="text" 
+            class="form-control" 
+            [value]="editingEmployee()!.prenom" 
+            readonly>
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">Email</label>
+          <input 
+            type="email" 
+            class="form-control" 
+            [value]="editingEmployee()!.email" 
+            readonly>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label class="form-label">Responsabilité</label>
+          <select 
+            class="form-select" 
+            [(ngModel)]="editingEmployee()!.responsabilite" 
+            name="editResponsabilite">
+            <option value="">Sélectionner...</option>
+            @for (resp of responsabilites; track resp) {
+              <option [value]="resp">{{ resp }}</option>
+            }
+          </select>
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">Service</label>
+          <select 
+            class="form-select" 
+            [(ngModel)]="editingEmployee()!.service" 
+            name="editService">
+            <option value="">Sélectionner...</option>
+            @for (srv of services; track srv) {
+              <option [value]="srv">{{ srv }}</option>
+            }
+          </select>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label class="form-label">Type Accès</label>
+          <select 
+            class="form-select" 
+            [(ngModel)]="editingEmployee()!.typeAcces" 
+            name="editTypeAcces">
+            <option value="">Sélectionner...</option>
+            @for (type of typeAccesOptions; track type) {
+              <option [value]="type">{{ type }}</option>
+            }
+          </select>
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">Session Windows</label>
+          <input 
+            type="text" 
+            class="form-control" 
+            [value]="editingEmployee()!.sessionWindows" 
+            readonly>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" (click)="modal.dismiss()">
+          Annuler
+        </button>
+        <button type="submit" class="btn btn-info">
+          <i class="feather icon-edit"></i> Enregistrer
+        </button>
+      </div>
+    </form>
+    }
+  </div>
+</ng-template>

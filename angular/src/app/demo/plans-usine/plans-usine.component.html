@@ -1,0 +1,41 @@
+<div class="row">
+  <div class="col-xl-12">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h4>Plans d'Action Usine</h4>
+      <span class="badge bg-primary fs-6">Sélectionnez un service</span>
+    </div>
+
+    <!-- Services Grid -->
+    <div class="row g-3">
+      @for (service of services; track service.id) {
+      <div class="col-md-6 col-lg-3 col-sm-6">
+        <div 
+          class="card service-card h-100 cursor-pointer" 
+          (click)="onServiceClick(service)"
+          [class.border-primary]="service.color === 'primary'"
+          [class.border-success]="service.color === 'success'"
+          [class.border-info]="service.color === 'info'"
+          [class.border-warning]="service.color === 'warning'"
+          [class.border-danger]="service.color === 'danger'"
+          [class.border-secondary]="service.color === 'secondary'">
+          <div class="card-body text-center p-2">
+            <div class="service-icon-wrapper mb-3">
+              <div 
+                class="service-icon rounded-circle d-inline-flex align-items-center justify-content-center"
+                [class.bg-primary]="service.color === 'primary'"
+                [class.bg-success]="service.color === 'success'"
+                [class.bg-info]="service.color === 'info'"
+                [class.bg-warning]="service.color === 'warning'"
+                [class.bg-danger]="service.color === 'danger'"
+                [class.bg-secondary]="service.color === 'secondary'">
+                <i [class]="service.icon"></i>
+              </div>
+            </div>
+            <h5 class="service-title mb-0">{{ service.name }}</h5>
+          </div>
+        </div>
+      </div>
+      }
+    </div>
+  </div>
+</div>

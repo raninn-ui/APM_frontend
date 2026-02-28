@@ -47,6 +47,95 @@ export const NavigationItems: NavigationItem[] = [
         url: '/action-plans',
         classes: 'nav-item',
         icon: 'feather icon-check-square'
+      },
+      {
+        id: 'plans-usine',
+        title: 'Plans d\'Action Usine',
+        type: 'item',
+        url: '/plans-usine',
+        icon: 'feather icon-briefcase',
+        classes: 'nav-item'
+      },
+      {
+        id: 'mes-plans',
+        title: 'Mes Plans d\'Action',
+        type: 'item',
+        url: '/mes-plans',
+        icon: 'feather icon-list',
+        classes: 'nav-item'
+      },
+      {
+        id: 'mes-actions',
+        title: 'Mes Actions',
+        type: 'item',
+        url: '/mes-actions',
+        icon: 'feather icon-check-square',
+        classes: 'nav-item'
+      },
+      {
+        id: 'suivi-actions',
+        title: 'Suivi Actions',
+        type: 'item',
+        url: '/suivi-actions',
+        icon: 'feather icon-activity',
+        classes: 'nav-item'
+      }
+    ]
+  },
+  {
+    id: 'statistiques-group',
+    title: 'Statistiques',
+    type: 'group',
+    icon: 'icon-group',
+    children: [
+      {
+        id: 'statistiques',
+        title: 'Statistiques',
+        type: 'item',
+        url: '/statistiques',
+        icon: 'feather icon-pie-chart',
+        classes: 'nav-item'
+      }
+    ]
+  },
+  {
+    id: 'parametres',
+    title: 'Paramètres',
+    type: 'group',
+    icon: 'icon-group',
+    children: [
+      {
+        id: 'parametres-collapse',
+        title: 'Paramètres',
+        type: 'collapse',
+        icon: 'feather icon-settings',
+        classes: 'nav-item',
+        children: [
+          {
+            id: 'administration',
+            title: 'Administration',
+            type: 'item',
+            url: '/parametres/administration',
+            icon: 'feather icon-shield',
+            classes: 'nav-item'
+          },
+          {
+            id: 'gestion-employes',
+            title: 'Gestion des employés',
+            type: 'item',
+            url: '/parametres/gestion-employes',
+            icon: 'feather icon-users',
+            classes: 'nav-item'
+          }
+        ]
+      },
+      {
+        id: 'aide',
+        title: 'Aide',
+        type: 'item',
+        url: '/aide',
+        icon: 'feather icon-help-circle',
+        classes: 'nav-item'
       }
     ]
   },
@@ -99,32 +188,6 @@ export const NavigationItems: NavigationItem[] = [
             url: '/component/typography'
           }
         ]
-      }
-    ]
-  },
-  {
-    id: 'Authentication',
-    title: 'Authentication',
-    type: 'group',
-    icon: 'icon-group',
-    children: [
-      {
-        id: 'signup',
-        title: 'Sign up',
-        type: 'item',
-        url: '/register',
-        icon: 'feather icon-at-sign',
-        target: true,
-        breadcrumbs: false
-      },
-      {
-        id: 'signin',
-        title: 'Sign in',
-        type: 'item',
-        url: '/login',
-        icon: 'feather icon-log-in',
-        target: true,
-        breadcrumbs: false
       }
     ]
   },
@@ -217,6 +280,32 @@ export const NavigationItems: NavigationItem[] = [
             ]
           }
         ]
+      }
+    ]
+  },
+  {
+    id: 'Authentication',
+    title: 'Authentication',
+    type: 'group',
+    icon: 'icon-group',
+    children: [
+      {
+        id: 'signup',
+        title: 'Sign up',
+        type: 'item',
+        url: '/register',
+        icon: 'feather icon-at-sign',
+        target: true,
+        breadcrumbs: false
+      },
+      {
+        id: 'signin',
+        title: 'Sign in',
+        type: 'item',
+        url: '/login',
+        icon: 'feather icon-log-in',
+        target: true,
+        breadcrumbs: false
       }
     ]
   }

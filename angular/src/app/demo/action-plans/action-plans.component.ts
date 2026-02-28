@@ -99,6 +99,7 @@ export class ActionPlansComponent {
   // Selected pilot value for multi-pilot dropdown
   selectedPilotValue = '';
 
+<<<<<<< HEAD
   // View mode: 'list', 'detail' (plan detail), or 'action-detail'
   viewMode = signal<'list' | 'detail' | 'action-detail'>('list');
   selectedPlan = signal<ActionPlan | null>(null);
@@ -160,6 +161,8 @@ export class ActionPlansComponent {
   fileDescription = signal<string>('');
   hasUploadedFile = signal<boolean>(false);
 
+=======
+>>>>>>> feature-eya
   actionPlans = signal<ActionPlan[]>([
     {
       id: 1,

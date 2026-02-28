@@ -5,6 +5,15 @@
         @if (items.type === 'group') {
           <app-nav-group [item]="items" />
         }
+
+
+        @if (items.type === 'item') {
+          <app-nav-item [item]="items" />
+        }
+        @if (items.type === 'collapse') {
+          <app-nav-group [item]="items" />
+        }
+
       }
     </ul>
     <app-card [hidHeader]="true" cardClass="text-center">
