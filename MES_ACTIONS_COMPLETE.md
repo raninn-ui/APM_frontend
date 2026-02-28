@@ -197,15 +197,29 @@ http://localhost:4200/mes-actions
 
 ---
 
-## 📊 Mock Data
+## 📊 Mock Data - 10 Actions from 6 Different Plans
 
-6 sample actions with realistic data:
-1. Améliorer la qualité des produits (P)
-2. Réduire les délais de livraison (D)
-3. Former l'équipe aux nouveaux outils (C)
-4. Mettre en place un système de monitoring (P)
-5. Audit de conformité (D)
-6. Optimiser les coûts d'exploitation (P)
+### Plan Qualite 2026 (3 actions):
+1. Améliorer la documentation des processus (P)
+2. Mettre en place un système de monitoring (P)
+3. Certification ISO 9001 (D)
+
+### Plan Operations 2026 (2 actions):
+1. Réduire les délais de traitement (D)
+2. Optimiser les coûts d'exploitation (P)
+
+### Plan RH 2026 (1 action):
+1. Former l'équipe aux nouveaux outils (C)
+
+### Plan Conformite 2026 (1 action):
+1. Audit de conformité (D)
+
+### Plan Informatique 2026 (2 actions):
+1. Implémenter un système ERP (P)
+2. Audit de sécurité informatique (D)
+
+### Plan Sante Securite 2026 (1 action):
+1. Améliorer la sécurité au travail (P)
 
 Each action includes:
 - Full details (theme, cause, criticite, etc.)
