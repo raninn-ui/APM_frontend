@@ -11,6 +11,13 @@ interface Comment {
   type: 'comment' | 'state_change' | 'rejection';
 }
 
+interface ActionFile {
+  id: number;
+  name: string;
+  description: string;
+  uploadDate: string;
+}
+
 interface Action {
   id: number;
   title: string;
@@ -18,6 +25,7 @@ interface Action {
   state: 'P' | 'D' | 'C';
   deadline: string;
   responsable: string;
+  pilote: string;
   theme: string;
   prevCorr: 'Preventive' | 'Corrective';
   anomAmel: string;
@@ -27,13 +35,12 @@ interface Action {
   description: string;
   cause: string;
   commentaire: string;
-  pilote: string;
   dateRealisee?: string;
   commentaireClosture?: string;
   methodVerification?: string;
   dateVerification?: string;
   efficacityRating?: number;
-  files?: { id: number; name: string; description: string; uploadDate: string }[];
+  files?: ActionFile[];
   comments?: Comment[];
 }
 
@@ -45,20 +52,31 @@ interface Action {
   styleUrls: ['./mes-actions.component.scss']
 })
 export class MesActionsComponent implements OnInit {
+  // View mode: 'list' for Interface 1, 'detail' for Interface 2
+  viewMode = signal<'list' | 'detail'>('list');
+
   // State management
   selectedAction = signal<Action | null>(null);
   filterState = signal<'all' | 'P' | 'D' | 'C'>('all');
   sortBy = signal<'deadline' | 'state'>('deadline');
-  showDetailPage = signal(false);
   toastMessage = signal('');
   showToast = signal(false);
+  toastType = signal<'success' | 'error' | 'info'>('success');
 
-  // Form states
+  // Form states for closure
   closureComment = signal('');
   verificationMethod = signal('');
   verificationDate = signal('');
+  showClosureForm = signal(false);
+
+  // New comment input
   newComment = signal('');
+
+  // File upload
   fileDescription = signal('');
+
+  // Current user
+  currentUser = 'Ahmed Benali';
 
   // Mock data
   actions = signal<Action[]>([
@@ -69,18 +87,22 @@ export class MesActionsComponent implements OnInit {
       state: 'P',
       deadline: '2026-03-15',
       responsable: 'Ahmed Benali',
+      pilote: 'GRITL Walid',
       theme: 'Documentation',
       prevCorr: 'Preventive',
       anomAmel: 'Amelioration',
       dateCreation: '2026-02-01',
       criticite: 'Haute',
       efficacite: 'N/A',
-      description: 'Documenter tous les processus critiques',
-      cause: 'Manque de documentation',
-      commentaire: 'Action prioritaire',
-      pilote: 'GRITL Walid',
-      files: [],
-      comments: []
+      description: 'Documenter tous les processus critiques de production',
+      cause: 'Manque de documentation standardisee',
+      commentaire: 'Action prioritaire pour Q1',
+      files: [
+        { id: 1, name: 'template_doc.docx', description: 'Template de documentation', uploadDate: '2026-02-15' }
+      ],
+      comments: [
+        { id: 1, author: 'Ahmed Benali', text: 'Action creee', timestamp: '2026-02-01 10:30', type: 'state_change' }
+      ]
     },
     {
       id: 2,
@@ -89,21 +111,28 @@ export class MesActionsComponent implements OnInit {
       state: 'D',
       deadline: '2026-02-28',
       responsable: 'Fatima Zahra',
+      pilote: 'Ahmed Benali',
       theme: 'Efficacite',
       prevCorr: 'Corrective',
       anomAmel: 'Amelioration',
       dateCreation: '2026-01-15',
       criticite: 'Moyenne',
       efficacite: 'N/A',
-      description: 'Optimiser les workflows',
-      cause: 'Processus inefficaces',
-      commentaire: 'En cours de realisation',
-      pilote: 'Ahmed Benali',
+      description: 'Optimiser les workflows de production pour reduire les delais',
+      cause: 'Processus inefficaces et goulots d\'etranglement',
+      commentaire: 'En cours de realisation - resultats positifs',
       dateRealisee: '2026-02-25',
-      commentaireClosture: 'Realise avec succes',
-      methodVerification: 'Tests de performance',
-      files: [],
-      comments: []
+      commentaireClosture: 'Realise avec succes - reduction de 15% des delais',
+      methodVerification: 'Tests de performance et mesure des KPIs',
+      files: [
+        { id: 2, name: 'rapport_optimisation.pdf', description: 'Rapport d\'optimisation', uploadDate: '2026-02-25' },
+        { id: 3, name: 'metriques_performance.xlsx', description: 'Metriques de performance', uploadDate: '2026-02-26' }
+      ],
+      comments: [
+        { id: 1, author: 'Fatima Zahra', text: 'Action demarree', timestamp: '2026-01-15 09:00', type: 'state_change' },
+        { id: 2, author: 'Ahmed Benali', text: 'Premiers resultats encourageants', timestamp: '2026-02-20 14:30', type: 'comment' },
+        { id: 3, author: 'Fatima Zahra', text: 'Action clôturee - objectifs atteints', timestamp: '2026-02-25 16:45', type: 'state_change' }
+      ]
     },
     {
       id: 3,
@@ -112,23 +141,30 @@ export class MesActionsComponent implements OnInit {
       state: 'C',
       deadline: '2026-02-20',
       responsable: 'Mohamed Karim',
+      pilote: 'GRITL Walid',
       theme: 'Formation',
       prevCorr: 'Preventive',
       anomAmel: 'Amelioration',
       dateCreation: '2026-01-10',
       criticite: 'Basse',
       efficacite: '4',
-      description: 'Sessions de formation pour tous',
-      cause: 'Adoption de nouveaux outils',
-      commentaire: 'Formation completee',
-      pilote: 'GRITL Walid',
+      description: 'Sessions de formation pour tous les employes sur les nouveaux outils',
+      cause: 'Adoption de nouveaux outils et systemes',
+      commentaire: 'Formation completee avec succes',
       dateRealisee: '2026-02-18',
-      commentaireClosture: 'Formation reussie',
-      methodVerification: 'Evaluation des participants',
+      commentaireClosture: 'Formation reussie - 95% de participation',
+      methodVerification: 'Evaluation des participants et tests pratiques',
       dateVerification: '2026-02-20',
       efficacityRating: 4,
-      files: [],
-      comments: []
+      files: [
+        { id: 4, name: 'slides_formation.pptx', description: 'Slides de formation', uploadDate: '2026-02-18' },
+        { id: 5, name: 'resultats_evaluation.pdf', description: 'Resultats d\'evaluation', uploadDate: '2026-02-20' }
+      ],
+      comments: [
+        { id: 1, author: 'Mohamed Karim', text: 'Formation demarree', timestamp: '2026-01-10 08:00', type: 'state_change' },
+        { id: 2, author: 'Mohamed Karim', text: 'Sessions completees avec succes', timestamp: '2026-02-18 17:00', type: 'state_change' },
+        { id: 3, author: 'GRITL Walid', text: 'Verification effectuee - action validee', timestamp: '2026-02-20 15:30', type: 'state_change' }
+      ]
     },
     {
       id: 4,
@@ -137,18 +173,20 @@ export class MesActionsComponent implements OnInit {
       state: 'P',
       deadline: '2026-03-01',
       responsable: 'Leila Mansouri',
+      pilote: 'Ahmed Benali',
       theme: 'Monitoring',
       prevCorr: 'Preventive',
       anomAmel: 'Amelioration',
       dateCreation: '2026-02-05',
       criticite: 'Haute',
       efficacite: 'N/A',
-      description: 'Installer les outils de monitoring',
-      cause: 'Besoin de visibilite',
-      commentaire: 'Urgent',
-      pilote: 'Ahmed Benali',
+      description: 'Installer les outils de monitoring en temps reel pour tous les processus critiques',
+      cause: 'Besoin de visibilite et de traçabilite des operations',
+      commentaire: 'Urgent - impact sur la qualite',
       files: [],
-      comments: []
+      comments: [
+        { id: 1, author: 'Leila Mansouri', text: 'Action creee', timestamp: '2026-02-05 11:00', type: 'state_change' }
+      ]
     },
     {
       id: 5,
@@ -157,21 +195,26 @@ export class MesActionsComponent implements OnInit {
       state: 'D',
       deadline: '2026-02-15',
       responsable: 'Hassan Bouali',
+      pilote: 'GRITL Walid',
       theme: 'Conformite',
       prevCorr: 'Corrective',
       anomAmel: 'Anomalie',
       dateCreation: '2026-01-20',
       criticite: 'Haute',
       efficacite: 'N/A',
-      description: 'Effectuer audit complet',
-      cause: 'Verification reglementaire',
-      commentaire: 'En cours',
-      pilote: 'GRITL Walid',
+      description: 'Effectuer audit complet de conformite reglementaire',
+      cause: 'Verification reglementaire obligatoire',
+      commentaire: 'En cours - audit externe en cours',
       dateRealisee: '2026-02-14',
-      commentaireClosture: 'Audit en cours',
-      methodVerification: 'Verification documentaire',
-      files: [],
-      comments: []
+      commentaireClosture: 'Audit realise - resultats en attente',
+      methodVerification: 'Verification documentaire et audit externe',
+      files: [
+        { id: 6, name: 'checklist_audit.xlsx', description: 'Checklist d\'audit', uploadDate: '2026-02-10' }
+      ],
+      comments: [
+        { id: 1, author: 'Hassan Bouali', text: 'Audit demarree', timestamp: '2026-01-20 09:30', type: 'state_change' },
+        { id: 2, author: 'Hassan Bouali', text: 'Audit realise - en attente des resultats', timestamp: '2026-02-14 17:00', type: 'state_change' }
+      ]
     },
     {
       id: 6,
@@ -180,18 +223,20 @@ export class MesActionsComponent implements OnInit {
       state: 'P',
       deadline: '2026-02-10',
       responsable: 'Nadia Saidani',
+      pilote: 'Ahmed Benali',
       theme: 'Couts',
       prevCorr: 'Corrective',
       anomAmel: 'Amelioration',
       dateCreation: '2026-01-25',
       criticite: 'Moyenne',
       efficacite: 'N/A',
-      description: 'Reduire les depenses',
-      cause: 'Optimisation budgetaire',
-      commentaire: 'A demarrer',
-      pilote: 'Ahmed Benali',
+      description: 'Reduire les depenses d\'exploitation de 10% sans impacter la qualite',
+      cause: 'Optimisation budgetaire et reduction des couts',
+      commentaire: 'A demarrer - analyse en cours',
       files: [],
-      comments: []
+      comments: [
+        { id: 1, author: 'Nadia Saidani', text: 'Action creee', timestamp: '2026-01-25 10:00', type: 'state_change' }
+      ]
     }
   ]);
 
@@ -220,7 +265,15 @@ export class MesActionsComponent implements OnInit {
 
   selectAction(action: Action) {
     this.selectedAction.set(action);
-    this.showDetailPage.set(true);
+    this.viewMode.set('detail');
+    this.showClosureForm.set(false);
+    this.resetClosureForm();
+  }
+
+  goBackToList() {
+    this.viewMode.set('list');
+    this.selectedAction.set(null);
+    this.resetClosureForm();
   }
 
   getDeadlineColor(deadline: string): string {
@@ -244,20 +297,91 @@ export class MesActionsComponent implements OnInit {
 
   getStateLabel(state: string): string {
     switch (state) {
-      case 'P': return 'Planifié';
-      case 'D': return 'Réalisé';
-      case 'C': return 'Vérifié';
+      case 'P': return 'Planifie';
+      case 'D': return 'Realise';
+      case 'C': return 'Verifie';
       default: return state;
     }
   }
 
-  closeAction() {
-    this.showDetailPage.set(false);
-    this.selectedAction.set(null);
+  // Closure workflow
+  openClosureForm() {
+    this.showClosureForm.set(true);
   }
 
-  showToastMessage(message: string) {
+  resetClosureForm() {
+    this.closureComment.set('');
+    this.verificationMethod.set('');
+    this.verificationDate.set('');
+    this.showClosureForm.set(false);
+  }
+
+  saveClosure() {
+    const action = this.selectedAction();
+    if (!action) return;
+
+    // Update action state and details
+    action.state = 'D';
+    action.dateRealisee = new Date().toISOString().split('T')[0];
+    action.commentaireClosture = this.closureComment();
+    action.methodVerification = this.verificationMethod();
+    action.dateVerification = this.verificationDate();
+
+    // Add comment to history
+    const newComment: Comment = {
+      id: (action.comments?.length || 0) + 1,
+      author: this.currentUser,
+      text: `Action clôturee - ${this.closureComment()}`,
+      timestamp: new Date().toLocaleString('fr-FR'),
+      type: 'state_change'
+    };
+
+    if (!action.comments) action.comments = [];
+    action.comments.push(newComment);
+
+    // Update the action in the list
+    const actions = this.actions();
+    const index = actions.findIndex(a => a.id === action.id);
+    if (index !== -1) {
+      actions[index] = action;
+      this.actions.set([...actions]);
+    }
+
+    this.selectedAction.set(action);
+    this.resetClosureForm();
+    this.showToastMessage('Action clôturee - Notification envoyee au pilote', 'success');
+  }
+
+  addComment() {
+    const action = this.selectedAction();
+    if (!action || !this.newComment()) return;
+
+    const comment: Comment = {
+      id: (action.comments?.length || 0) + 1,
+      author: this.currentUser,
+      text: this.newComment(),
+      timestamp: new Date().toLocaleString('fr-FR'),
+      type: 'comment'
+    };
+
+    if (!action.comments) action.comments = [];
+    action.comments.push(comment);
+
+    // Update the action in the list
+    const actions = this.actions();
+    const index = actions.findIndex(a => a.id === action.id);
+    if (index !== -1) {
+      actions[index] = action;
+      this.actions.set([...actions]);
+    }
+
+    this.selectedAction.set(action);
+    this.newComment.set('');
+  }
+
+  showToastMessage(message: string, type: 'success' | 'error' | 'info' = 'success') {
     this.toastMessage.set(message);
+    this.toastType.set(type);
     this.showToast.set(true);
     setTimeout(() => this.showToast.set(false), 3000);
   }
