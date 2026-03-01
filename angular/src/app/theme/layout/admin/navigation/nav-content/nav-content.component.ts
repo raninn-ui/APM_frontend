@@ -8,10 +8,11 @@ import { NavigationItem, NavigationItems } from '../navigation';
 import { SharedModule } from 'src/app/theme/shared/shared.module';
 import { NavGroupComponent } from './nav-group/nav-group.component';
 import { NavItemComponent } from './nav-item/nav-item.component';
+import { NavCollapseComponent } from './nav-collapse/nav-collapse.component';
 
 @Component({
   selector: 'app-nav-content',
-  imports: [SharedModule, NavGroupComponent, NavItemComponent],
+  imports: [SharedModule, NavGroupComponent, NavItemComponent, NavCollapseComponent],
   templateUrl: './nav-content.component.html',
   styleUrls: ['./nav-content.component.scss']
 })

@@ -17,7 +17,7 @@ export interface NavigationItem {
   };
   children?: NavigationItem[];
 }
-  
+   
 export const NavigationItems: NavigationItem[] = [
   {
     id: 'plans-usine',

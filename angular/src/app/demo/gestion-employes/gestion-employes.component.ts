@@ -60,9 +60,22 @@ export class GestionEmployesComponent {
   });
 
   // Options for dropdowns
-  responsabilites = ['Pilote', 'Rédacteur', 'Responsable', 'Admin', 'Autre'];
-  services = ['Qualité', 'RH', 'Finance', 'Production', 'IT', 'Maintenance', 'Achats', 'Commercial'];
-  typeAccesOptions = ['Admin', 'User', 'Guest'];
+  responsabilites = ['Pilote', 'Rédacteur', 'Responsable', 'Autre'];
+  services = [
+    'Gérer les ressources Materielles',
+    'Piloter le centre',
+    'Gérer les systeme D\'information',
+    'Commercialiser',
+    'Dérogation',
+    'Direction Administrative et financiére',
+    'Gérer Les Ressources Humaines',
+    'Systéme & AC',
+    'Fabriquer',
+    'Gérer Les Achats',
+    'Industrialisation',
+    'Gérer La Supply Chain'
+  ];
+  typeAccesOptions = ['User', 'Guest'];
 
   constructor() {
     this.filteredEmployees.set(this.employees());
