@@ -56,6 +56,7 @@ interface ActionPlan {
   modificationDate?: string;
   type: 'Mono-Pilote' | 'Multi-Pilote';
   status?: string;
+  visibility?: 'Public' | 'Privé'; // Public or Private
   actions?: Action[];
 }
 
@@ -312,6 +313,7 @@ export class ActionPlansComponent {
     process: '',
     creationDate: this.getTodayDate(),
     type: 'Mono-Pilote' as const,
+    visibility: 'Public' as const,
     selectedPilots: [this.currentUser]
   });
 
@@ -329,7 +331,8 @@ export class ActionPlansComponent {
         pilots: selectedPilots,
         process: this.newPlan().process,
         creationDate: this.newPlan().creationDate,
-        type: this.newPlan().type
+        type: this.newPlan().type,
+        visibility: this.newPlan().visibility
       };
 
       this.actionPlans.update(plans => [...plans, plan]);
@@ -349,6 +352,7 @@ export class ActionPlansComponent {
       process: '',
       creationDate: this.getTodayDate(),
       type: 'Mono-Pilote',
+      visibility: 'Public',
       selectedPilots: [this.currentUser]
     });
   }
