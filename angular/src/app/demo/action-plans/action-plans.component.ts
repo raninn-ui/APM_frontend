@@ -168,6 +168,7 @@ export class ActionPlansComponent {
       process: 'Gestion des Opérations',
       creationDate: '15/02/2026',
       type: 'Mono-Pilote',
+      visibility: 'Public',
       status: 'Modifié',
       actions: [
         {
@@ -209,6 +210,7 @@ export class ActionPlansComponent {
       process: 'Gestion de la Qualité',
       creationDate: '10/02/2026',
       type: 'Multi-Pilote',
+      visibility: 'Privé',
       status: 'Modifié',
       actions: [
         {
@@ -264,6 +266,7 @@ export class ActionPlansComponent {
       process: 'Gestion des Ressources Humaines',
       creationDate: '05/02/2026',
       type: 'Mono-Pilote',
+      visibility: 'Public',
       status: 'Modifié',
       actions: [
         {

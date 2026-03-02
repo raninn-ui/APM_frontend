@@ -24,6 +24,7 @@
                 <th>Processus</th>
                 <th>Date Création</th>
                 <th>Type</th>
+                <th>Visibilité</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -43,6 +44,11 @@
                     {{ plan.type }}
                   </span>
                 </td>
+                <td>
+                  <span [class]="'badge ' + (plan.visibility === 'Public' ? 'badge-info' : 'badge-warning')">
+                    {{ plan.visibility || 'Public' }}
+                  </span>
+                </td>
                 <td (click)="$event.stopPropagation()">
                   <button
                     class="btn btn-sm btn-danger"
@@ -53,7 +59,7 @@
                 </td>
               </tr>
               <tr *ngIf="actionPlans().length === 0">
-                <td colspan="7" class="text-center text-muted py-4">
+                <td colspan="8" class="text-center text-muted py-4">
                   Aucun plan d'action. Cliquez sur "Ajouter un nouveau plan" pour en créer un.
                 </td>
               </tr>
