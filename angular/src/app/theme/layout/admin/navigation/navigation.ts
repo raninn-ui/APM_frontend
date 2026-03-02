@@ -57,13 +57,14 @@ export const NavigationItems: NavigationItem[] = [
     type: 'item',
     url: '/statistiques',
     icon: 'feather icon-pie-chart',
-    classes: 'nav-item active'
+    classes: 'nav-item'
   },
   {
     id: 'parametres',
     title: 'Paramètres',
-    type: 'group',
-    icon: 'icon-group',
+    type: 'collapse',
+    icon: 'feather icon-settings',
+    classes: 'nav-item',
     children: [
       {
         id: 'administration',
@@ -80,16 +81,15 @@ export const NavigationItems: NavigationItem[] = [
         url: '/parametres/gestion-employes',
         icon: 'feather icon-users',
         classes: 'nav-item'
-      },
-      {
-        id: 'aide',
-        title: 'Aide',
-        type: 'item',
-        url: '/aide',
-        icon: 'feather icon-help-circle',
-        classes: 'nav-item'
       }
     ]
   },
-
+  {
+    id: 'aide',
+    title: 'Aide',
+    type: 'item',
+    url: '/aide',
+    icon: 'feather icon-help-circle',
+    classes: 'nav-item'
+  }
 ];
