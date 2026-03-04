@@ -15,7 +15,7 @@ export interface LoginResponse {
     id: string;
     email: string;
     name: string;
-    role: 'admin' | 'manager' | 'user';
+    role: 'Admin' | 'Pilot' | 'Responsable' | 'Consultateur' | 'Redacteur';
   };
 }
 
@@ -23,7 +23,7 @@ export interface User {
   id: string;
   email: string;
   name: string;
-  role: 'admin' | 'manager' | 'user';
+  role: 'Admin' | 'Pilot' | 'Responsable' | 'Consultateur' | 'Redacteur';
 }
 
 @Injectable({
@@ -77,7 +77,7 @@ export class AuthService {
         id: '1',
         email: credentials.email,
         name: credentials.email.split('@')[0],
-        role: 'user' as const
+        role: 'Redacteur' as const
       }
     };
 
@@ -191,7 +191,7 @@ export class AuthService {
   /**
    * Get user role
    */
-  getUserRole(): 'admin' | 'manager' | 'user' | null {
+  getUserRole(): 'Admin' | 'Pilot' | 'Responsable' | 'Consultateur' | 'Redacteur' |null {
     const user = this.getCurrentUser();
     return user ? user.role : null;
   }
@@ -199,14 +199,14 @@ export class AuthService {
   /**
    * Check if user has specific role
    */
-  hasRole(role: string): boolean {
+  hasRole(role: 'Admin' | 'Pilot' | 'Responsable' | 'Consultateur' | 'Redacteur'): boolean {
     return this.getUserRole() === role;
   }
 
   /**
    * Check if user has any of the specified roles
    */
-  hasAnyRole(roles: string[]): boolean {
+  hasAnyRole(roles: ('Admin' | 'Pilot' | 'Responsable' | 'Consultateur' | 'Redacteur')[]): boolean {
     const userRole = this.getUserRole();
     return userRole ? roles.includes(userRole) : false;
   }
