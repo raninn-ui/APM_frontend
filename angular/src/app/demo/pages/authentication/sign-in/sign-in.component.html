@@ -6,7 +6,7 @@
           <div class="card-body">
             <form (ngSubmit)="onSubmit($event)">
               <img src="assets/images/auth/auth-logo-dark.svg" alt="APM logo" class="img-fluid mb-4" />
-              <h4 class="mb-3 f-w-400">Signin</h4>
+              <h4 class="mb-3 f-w-400">Se connecter</h4>
               <div class="input-group mb-3">
                 <input
                   type="email"
@@ -55,15 +55,15 @@
               <div class="form-group text-start mt-2">
                 <div class="checkbox checkbox-primary d-inline">
                   <input type="checkbox" name="checkbox-fill-1" id="checkbox-fill-a1" checked="" />
-                  <label for="checkbox-fill-a1" class="cr">Save credentials</label>
+                  <label for="checkbox-fill-a1" class="cr">Se souvenir de moi</label>
                 </div>
               </div>
               <div class="d-grid">
-                <button type="submit" class="btn btn-block btn-primary mb-4">Signin</button>
+                <button type="submit" class="btn btn-block btn-primary mb-4">Se connecter</button>
               </div>
               <p class="mb-2 text-muted">
-                Forgot password?
-                <a [routerLink]="['/forgot-password']" class="f-w-400">Reset</a>
+                Mot de passe oublié?
+                <a [routerLink]="['/forgot-password']" class="f-w-400">Réinitialiser</a>
               </p>
             </form>
           </div>
