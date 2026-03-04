@@ -15,7 +15,7 @@ export interface LoginResponse {
     id: string;
     email: string;
     name: string;
-    role: 'Admin' | 'Pilot' | 'Responsable' | 'Consultateur' | 'Redacteur';
+    role: 'Admin' | 'Pilot' | 'Responsable' | 'Consultant' | 'Redacteur';
   };
 }
 
@@ -23,7 +23,24 @@ export interface User {
   id: string;
   email: string;
   name: string;
-  role: 'Admin' | 'Pilot' | 'Responsable' | 'Consultateur' | 'Redacteur';
+  role: 'Admin' | 'Pilot' | 'Responsable' | 'Consultant' | 'Redacteur';
+}
+
+export type UserRole = 'Admin' | 'Pilot' | 'Responsable' | 'Consultant' | 'Redacteur';
+
+export interface RolePermissions {
+  canCreatePlans: boolean;
+  canAssignActions: boolean;
+  canViewStatistics: boolean;
+  canValidateActions: boolean;
+  canClosePlans: boolean;
+  canViewOwnActions: boolean;
+  canUpdateProgress: boolean;
+  canCloseOwnActions: boolean;
+  canUploadFiles: boolean;
+  canAddComments: boolean;
+  canViewPlans: boolean;
+  canManageUsers: boolean;
 }
 
 @Injectable({
@@ -191,7 +208,7 @@ export class AuthService {
   /**
    * Get user role
    */
-  getUserRole(): 'Admin' | 'Pilot' | 'Responsable' | 'Consultateur' | 'Redacteur' |null {
+  getUserRole(): UserRole | null {
     const user = this.getCurrentUser();
     return user ? user.role : null;
   }
@@ -199,15 +216,94 @@ export class AuthService {
   /**
    * Check if user has specific role
    */
-  hasRole(role: 'Admin' | 'Pilot' | 'Responsable' | 'Consultateur' | 'Redacteur'): boolean {
+  hasRole(role: UserRole): boolean {
     return this.getUserRole() === role;
   }
 
   /**
    * Check if user has any of the specified roles
    */
-  hasAnyRole(roles: ('Admin' | 'Pilot' | 'Responsable' | 'Consultateur' | 'Redacteur')[]): boolean {
+  hasAnyRole(roles: UserRole[]): boolean {
     const userRole = this.getUserRole();
     return userRole ? roles.includes(userRole) : false;
+  }
+
+  /**
+   * Get permissions for current user role
+   */
+  getPermissions(): RolePermissions {
+    const role = this.getUserRole();
+
+    const defaultPermissions: RolePermissions = {
+      canCreatePlans: false,
+      canAssignActions: false,
+      canViewStatistics: false,
+      canValidateActions: false,
+      canClosePlans: false,
+      canViewOwnActions: false,
+      canUpdateProgress: false,
+      canCloseOwnActions: false,
+      canUploadFiles: false,
+      canAddComments: false,
+      canViewPlans: false,
+      canManageUsers: false
+    };
+
+    switch (role) {
+      case 'Admin':
+        return {
+          ...defaultPermissions,
+          canManageUsers: true,
+          canViewPlans: true,
+          canViewStatistics: true
+        };
+
+      case 'Pilot':
+        return {
+          ...defaultPermissions,
+          canCreatePlans: true,
+          canAssignActions: true,
+          canViewStatistics: true,
+          canValidateActions: true,
+          canClosePlans: true,
+          canViewPlans: true
+        };
+
+      case 'Responsable':
+        return {
+          ...defaultPermissions,
+          canViewOwnActions: true,
+          canUpdateProgress: true,
+          canCloseOwnActions: true,
+          canUploadFiles: true,
+          canAddComments: true
+        };
+
+      case 'Consultant':
+        return {
+          ...defaultPermissions,
+          canViewPlans: true,
+          canViewStatistics: true
+        };
+
+      case 'Redacteur':
+        return {
+          ...defaultPermissions,
+          canAssignActions: true,
+          canViewStatistics: true,
+          canValidateActions: true,
+          canViewPlans: true
+        };
+
+      default:
+        return defaultPermissions;
+    }
+  }
+
+  /**
+   * Check if user has specific permission
+   */
+  hasPermission(permission: keyof RolePermissions): boolean {
+    return this.getPermissions()[permission];
   }
 }
