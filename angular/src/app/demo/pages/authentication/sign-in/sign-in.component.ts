@@ -1,7 +1,7 @@
 // angular import
 import { ChangeDetectorRef, Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 import { email, Field, form, minLength, required } from '@angular/forms/signals';
 
 // project import
@@ -15,6 +15,7 @@ import { SharedModule } from 'src/app/theme/shared/shared.module';
 })
 export class SignInComponent {
   private cd = inject(ChangeDetectorRef);
+  private router = inject(Router);
 
   submitted = signal(false);
   error = signal('');
@@ -50,8 +51,8 @@ export class SignInComponent {
     console.log('User logged in with:', credentials);
 
     // TODO: Call authentication API here
-    // For now, just show success message
-    alert('Login successful! (Mock)');
+    // For now, redirect to Plans d'Action Usine
+    this.router.navigate(['/plans-usine']);
 
     this.cd.detectChanges();
   }
