@@ -36,8 +36,23 @@ export class SignInComponent {
     this.submitted.set(true);
     this.error.set('');
     event.preventDefault();
+
+    // Check if email and password have errors
+    const emailErrors = this.loginForm.email().errors();
+    const passwordErrors = this.loginForm.password().errors();
+
+    if (emailErrors.length > 0 || passwordErrors.length > 0) {
+      this.error.set('Please fix the errors above');
+      return;
+    }
+
     const credentials = this.loginModal();
-    console.log('login user logged in with:', credentials);
+    console.log('User logged in with:', credentials);
+
+    // TODO: Call authentication API here
+    // For now, just show success message
+    alert('Login successful! (Mock)');
+
     this.cd.detectChanges();
   }
 
