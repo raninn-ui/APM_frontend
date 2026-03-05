@@ -5,11 +5,13 @@ import { Routes, RouterModule } from '@angular/router';
 // project import
 import { AdminComponent } from './theme/layout/admin/admin.component';
 import { GuestComponent } from './theme/layout/guest/guest.component';
+import { authGuard } from './services/auth-guard';
 
 const routes: Routes = [
   {
     path: '',
     component: AdminComponent,
+    canActivate: [authGuard],
     children: [
       {
         path: '',
@@ -203,6 +205,10 @@ const routes: Routes = [
       {
         path: 'forgot-password',
         loadComponent: () => import('./demo/pages/authentication/forgot-password/forgot-password').then((c) => c.ForgotPassword)
+      },
+      {
+        path: 'unauthorized',
+        loadComponent: () => import('./demo/pages/authentication/unauthorized/unauthorized.component').then((c) => c.UnauthorizedComponent)
       }
     ]
   }

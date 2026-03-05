@@ -1,0 +1,86 @@
+// Unauthorized Page Styles
+
+.min-vh-100 {
+  min-height: 100vh;
+}
+
+.card {
+  border-radius: 12px;
+  transition: all 0.3s ease;
+
+  &:hover {
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15) !important;
+  }
+}
+
+.btn {
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  font-weight: 600;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+.btn-primary {
+  background-color: #4680ff;
+  border-color: #4680ff;
+
+  &:hover {
+    background-color: #3a6dd9;
+    border-color: #3a6dd9;
+  }
+}
+
+.btn-outline-primary {
+  color: #4680ff;
+  border-color: #4680ff;
+
+  &:hover {
+    background-color: #4680ff;
+    color: white;
+  }
+}
+
+i {
+  animation: bounce 2s infinite;
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+// Responsive
+@media (max-width: 768px) {
+  .card-body {
+    padding: 2rem !important;
+  }
+
+  h1 {
+    font-size: 36px !important;
+  }
+
+  h2 {
+    font-size: 20px !important;
+  }
+
+  .d-flex {
+    flex-direction: column;
+
+    .btn {
+      width: 100%;
+    }
+  }
+}
+
