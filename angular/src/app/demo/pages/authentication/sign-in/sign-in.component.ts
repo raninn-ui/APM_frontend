@@ -71,4 +71,33 @@ export class SignInComponent {
   togglePasswordVisibility() {
     this.showPassword.set(!this.showPassword());
   }
+
+  /**
+   * Fill login form with test account credentials
+   * Used for testing different roles
+   */
+  fillTestAccount(email: string) {
+    this.loginModal.set({
+      email: email,
+      password: 'password123'
+    });
+    this.cd.detectChanges();
+    console.log(`📝 Test account filled: ${email}`);
+  }
+
+  /**
+   * Test accounts available:
+   * - admin@example.com → Admin
+   * - pilot@example.com → Pilot
+   * - responsable@example.com → Responsable
+   * - consultant@example.com → Consultant
+   * - redacteur@example.com → Redacteur
+   */
+  testAccounts = [
+    { email: 'admin@example.com', role: 'Admin', description: 'Gère les utilisateurs' },
+    { email: 'pilot@example.com', role: 'Pilot', description: 'Crée et gère les plans' },
+    { email: 'responsable@example.com', role: 'Responsable', description: 'Gère ses actions' },
+    { email: 'consultant@example.com', role: 'Consultant', description: 'Lecture seule' },
+    { email: 'redacteur@example.com', role: 'Redacteur', description: 'Crée des actions' }
+  ];
 }

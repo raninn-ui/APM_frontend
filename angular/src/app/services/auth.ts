@@ -88,20 +88,69 @@ export class AuthService {
     // );
 
     // Mock API response for now
+    // Determine role based on email (for testing different roles)
+    const role = this.getRoleByEmail(credentials.email);
+
     const mockResponse: LoginResponse = {
       token: 'mock_token_' + Date.now(),
       user: {
         id: '1',
         email: credentials.email,
         name: credentials.email.split('@')[0],
-        role: 'Redacteur' as const
+        role: role
       }
     };
+
+    console.log('🔐 Mock Login:', { email: credentials.email, role });
 
     return of(mockResponse).pipe(
       tap(response => this.handleLoginSuccess(response)),
       catchError(error => this.handleLoginError(error))
     );
+  }
+
+  /**
+   * Determine user role based on email (for testing)
+   * In production, this will be provided by the backend
+   *
+   * Test Accounts:
+   * - admin@example.com → Admin
+   * - pilot@example.com → Pilot
+   * - responsable@example.com → Responsable
+   * - consultant@example.com → Consultant
+   * - redacteur@example.com → Redacteur
+   */
+  private getRoleByEmail(email: string): UserRole {
+    const emailLower = email.toLowerCase().trim();
+
+    // Admin account
+    if (emailLower === 'admin@example.com') {
+      return 'Admin';
+    }
+
+    // Pilot account
+    if (emailLower === 'pilot@example.com') {
+      return 'Pilot';
+    }
+
+    // Responsable account
+    if (emailLower === 'responsable@example.com') {
+      return 'Responsable';
+    }
+
+    // Consultant account
+    if (emailLower === 'consultant@example.com') {
+      return 'Consultant';
+    }
+
+    // Redacteur account (default)
+    if (emailLower === 'redacteur@example.com') {
+      return 'Redacteur';
+    }
+
+    // Default role for any other email
+    console.warn(`⚠️ Unknown email: ${email}. Assigning default role: Redacteur`);
+    return 'Redacteur';
   }
 
   /**
