@@ -651,6 +651,12 @@
               </p>
             </div>
 
+            <!-- Closure Form (shown when state = P and form is active) -->
+            <ng-container *ngIf="selectedActionDetail()?.state === 'P' && !showClosureForm()">
+              <button class="btn btn-primary btn-action" (click)="initiateActionClosure()">
+                <i class="feather icon-check"></i> Realiser l'action
+              </button>
+            </ng-container>
 
             <ng-container *ngIf="showClosureForm()">
               <div class="alert alert-warning" *ngIf="!hasUploadedFile()">
