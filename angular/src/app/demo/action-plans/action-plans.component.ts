@@ -6,6 +6,7 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 // project import
 import { SharedModule } from 'src/app/theme/shared/shared.module';
 import { RadialGaugeComponent } from './radial-gauge.component';
+import { AuthService } from 'src/app/services/auth';
 
 interface Employee {
   id: number;
@@ -69,6 +70,7 @@ interface ActionPlan {
 })
 export class ActionPlansComponent {
   private modalService = inject(NgbModal);
+  private authService = inject(AuthService);
   Math = Math; // Expose Math to template
 
   // List of available processes/services
@@ -345,7 +347,28 @@ export class ActionPlansComponent {
   }
 
   deletePlan(id: number): void {
-    this.actionPlans.update(plans => plans.filter(p => p.id !== id));
+    const userRole = this.authService.getUserRole();
+
+    // Redacteur cannot delete plans
+    if (userRole === 'Redacteur') {
+      alert('❌ Vous n\'avez pas la permission de supprimer un plan. Seul le Pilote peut supprimer les plans.');
+      console.warn('⚠️ Redacteur attempted to delete plan:', id);
+      return;
+    }
+
+    if (confirm('Êtes-vous sûr de vouloir supprimer ce plan?')) {
+      this.actionPlans.update(plans => plans.filter(p => p.id !== id));
+      console.log(`✅ Plan ${id} deleted by ${userRole}`);
+    }
+  }
+
+  /**
+   * Check if current user can delete plans
+   * Only Pilot and Admin can delete plans, not Redacteur
+   */
+  canDeletePlan(): boolean {
+    const userRole = this.authService.getUserRole();
+    return userRole === 'Pilot' || userRole === 'Admin';
   }
 
   resetForm(): void {
@@ -430,12 +453,31 @@ export class ActionPlansComponent {
 
   closePlan(): void {
     const plan = this.selectedPlan();
+    const userRole = this.authService.getUserRole();
+
+    // Redacteur cannot close plans
+    if (userRole === 'Redacteur') {
+      alert('❌ Vous n\'avez pas la permission de clôturer un plan. Seul le Pilote peut clôturer les plans.');
+      console.warn('⚠️ Redacteur attempted to close plan:', plan?.id);
+      return;
+    }
+
     if (plan) {
       plan.status = 'Clôturé';
       this.selectedPlan.set({ ...plan });
       const updatedPlans = this.actionPlans().map(p => p.id === plan.id ? plan : p);
       this.actionPlans.set(updatedPlans);
+      console.log(`✅ Plan ${plan.id} closed by ${userRole}`);
     }
+  }
+
+  /**
+   * Check if current user can close plans
+   * Only Pilot and Admin can close plans, not Redacteur
+   */
+  canClosePlan(): boolean {
+    const userRole = this.authService.getUserRole();
+    return userRole === 'Pilot' || userRole === 'Admin';
   }
 
   isPlanClosed(): boolean {

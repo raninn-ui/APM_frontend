@@ -13,7 +13,7 @@ const routes: Routes = [
     component: AdminComponent,
     canActivate: [authGuard],
     children: [
-      {
+      { 
         path: '',
         redirectTo: '/analytics',
         pathMatch: 'full'
@@ -108,19 +108,27 @@ const routes: Routes = [
       },
       {
         path: 'mes-plans',
-        loadComponent: () => import('./demo/action-plans/action-plans.component').then((c) => c.ActionPlansComponent)
+        loadComponent: () => import('./demo/action-plans/action-plans.component').then((c) => c.ActionPlansComponent),
+        canActivate: [authGuard],
+        data: { roles: ['Pilot', 'Redacteur'] }
       },
       {
         path: 'mes-actions',
-        loadComponent: () => import('./demo/mes-actions/mes-actions.component').then((c) => c.MesActionsComponent)
+        loadComponent: () => import('./demo/mes-actions/mes-actions.component').then((c) => c.MesActionsComponent),
+        canActivate: [authGuard],
+        data: { roles: ['Responsable'] }
       },
       {
         path: 'suivi-actions',
-        loadComponent: () => import('./demo/dashboard/dash-analytics.component').then((c) => c.DashAnalyticsComponent)
+        loadComponent: () => import('./demo/dashboard/dash-analytics.component').then((c) => c.DashAnalyticsComponent),
+        canActivate: [authGuard],
+        data: { roles: ['Pilot', 'Admin'] }
       },
       {
         path: 'statistiques',
         loadComponent: () => import('./demo/statistiques/statistiques.component').then((c) => c.StatistiquesComponent),
+        canActivate: [authGuard],
+        data: { roles: ['Admin', 'Pilot', 'Consultant', 'Redacteur'] },
         children: [
           {
             path: '',
@@ -167,6 +175,8 @@ const routes: Routes = [
       },
       {
         path: 'parametres',
+        canActivate: [authGuard],
+        data: { roles: ['Admin'] },
         children: [
           {
             path: '',

@@ -9,6 +9,7 @@ import { SharedModule } from 'src/app/theme/shared/shared.module';
 import { NavGroupComponent } from './nav-group/nav-group.component';
 import { NavItemComponent } from './nav-item/nav-item.component';
 import { NavCollapseComponent } from './nav-collapse/nav-collapse.component';
+import { AuthService } from 'src/app/services/auth';
 
 @Component({
   selector: 'app-nav-content',
@@ -19,6 +20,7 @@ import { NavCollapseComponent } from './nav-collapse/nav-collapse.component';
 export class NavContentComponent implements OnInit {
   private location = inject(Location);
   private locationStrategy = inject(LocationStrategy);
+  private authService = inject(AuthService);
 
   // version
   title = 'Demo application for version numbering';
@@ -35,7 +37,7 @@ export class NavContentComponent implements OnInit {
 
   // constructor
   constructor() {
-    this.navigation = NavigationItems;
+    this.navigation = this.filterNavigationByRole(NavigationItems);
     this.windowWidth = window.innerWidth;
     this.scrollWidth = 0;
     this.contentWidth = 0;
@@ -111,5 +113,40 @@ export class NavContentComponent implements OnInit {
         last_parent.classList.add('active');
       }
     }
+  }
+
+  /**
+   * Filter navigation items based on user role
+   * Only show menu items that the user's role is allowed to see
+   */
+  private filterNavigationByRole(items: NavigationItem[]): NavigationItem[] {
+    const userRole = this.authService.getUserRole();
+
+    if (!userRole) {
+      console.warn('⚠️ No user role found. Showing no navigation items.');
+      return [];
+    }
+
+    console.log(`🔐 Filtering navigation for role: ${userRole}`);
+
+    return items
+      .filter(item => {
+        // If no roles are specified, show the item to everyone
+        if (!item.roles || item.roles.length === 0) {
+          return true;
+        }
+        // Show item only if user's role is in the allowed roles
+        return item.roles.includes(userRole);
+      })
+      .map(item => {
+        // Recursively filter children
+        if (item.children && item.children.length > 0) {
+          return {
+            ...item,
+            children: this.filterNavigationByRole(item.children)
+          };
+        }
+        return item;
+      });
   }
 }

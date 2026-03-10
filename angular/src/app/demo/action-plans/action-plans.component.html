@@ -51,6 +51,7 @@
                 </td>
                 <td (click)="$event.stopPropagation()">
                   <button
+                    *ngIf="canDeletePlan()"
                     class="btn btn-sm btn-danger"
                     (click)="deletePlan(plan.id)"
                     title="Supprimer">
@@ -151,7 +152,7 @@
           <button class="btn btn-success btn-sm" (click)="validatePlan()" [disabled]="isPlanClosed()">
             <i class="feather icon-check"></i> Valider Plan
           </button>
-          <button class="btn btn-warning btn-sm" (click)="closePlan()" [disabled]="isPlanClosed()">
+          <button *ngIf="canClosePlan()" class="btn btn-warning btn-sm" (click)="closePlan()" [disabled]="isPlanClosed()" title="Clôturer le plan">
             <i class="feather icon-x"></i> Cloturer Plan
           </button>
           <button class="btn btn-info btn-sm" (click)="openDocumentsModal()">

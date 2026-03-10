@@ -16,6 +16,7 @@ export interface NavigationItem {
     type?: string;
   };
   children?: NavigationItem[];
+  roles?: string[]; // Roles that can see this menu item
 }
 
 export const NavigationItems: NavigationItem[] = [
@@ -25,7 +26,8 @@ export const NavigationItems: NavigationItem[] = [
     type: 'item',
     url: '/plans-usine',
     icon: 'feather icon-briefcase',
-    classes: 'nav-item'
+    classes: 'nav-item',
+    roles: ['Admin', 'Pilot', 'Responsable', 'Consultant', 'Redacteur'] // Visible to all
   },
   {
     id: 'mes-plans',
@@ -33,7 +35,8 @@ export const NavigationItems: NavigationItem[] = [
     type: 'item',
     url: '/mes-plans',
     icon: 'feather icon-list',
-    classes: 'nav-item'
+    classes: 'nav-item',
+    roles: ['Pilot', 'Redacteur'] // Only Pilot and Redacteur can create/manage plans
   },
   {
     id: 'mes-actions',
@@ -41,7 +44,8 @@ export const NavigationItems: NavigationItem[] = [
     type: 'item',
     url: '/mes-actions',
     icon: 'feather icon-check-square',
-    classes: 'nav-item'
+    classes: 'nav-item',
+    roles: ['Responsable'] // Only Responsable manages their assigned actions
   },
   {
     id: 'suivi-actions',
@@ -49,7 +53,8 @@ export const NavigationItems: NavigationItem[] = [
     type: 'item',
     url: '/suivi-actions',
     icon: 'feather icon-activity',
-    classes: 'nav-item'
+    classes: 'nav-item',
+    roles: ['Pilot', 'Admin'] // Pilot and Admin can follow actions
   },
   {
     id: 'statistiques',
@@ -57,7 +62,8 @@ export const NavigationItems: NavigationItem[] = [
     type: 'item',
     url: '/statistiques',
     icon: 'feather icon-pie-chart',
-    classes: 'nav-item'
+    classes: 'nav-item',
+    roles: ['Admin', 'Pilot', 'Consultant', 'Redacteur'] // All except Responsable
   },
   {
     id: 'parametres',
@@ -65,6 +71,7 @@ export const NavigationItems: NavigationItem[] = [
     type: 'collapse',
     icon: 'feather icon-settings',
     classes: 'nav-item',
+    roles: ['Admin'], // Only Admin can access settings
     children: [
       {
         id: 'administration',
@@ -72,7 +79,8 @@ export const NavigationItems: NavigationItem[] = [
         type: 'item',
         url: '/parametres/administration',
         icon: 'feather icon-shield',
-        classes: 'nav-item'
+        classes: 'nav-item',
+        roles: ['Admin']
       },
       {
         id: 'gestion-employes',
@@ -80,7 +88,8 @@ export const NavigationItems: NavigationItem[] = [
         type: 'item',
         url: '/parametres/gestion-employes',
         icon: 'feather icon-users',
-        classes: 'nav-item'
+        classes: 'nav-item',
+        roles: ['Admin']
       }
     ]
   },
@@ -90,6 +99,7 @@ export const NavigationItems: NavigationItem[] = [
     type: 'item',
     url: '/aide',
     icon: 'feather icon-help-circle',
-    classes: 'nav-item'
+    classes: 'nav-item',
+    roles: ['Admin', 'Pilot', 'Responsable', 'Consultant', 'Redacteur'] // Visible to all
   }
 ];

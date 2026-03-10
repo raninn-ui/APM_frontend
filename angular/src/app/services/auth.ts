@@ -355,4 +355,38 @@ export class AuthService {
   hasPermission(permission: keyof RolePermissions): boolean {
     return this.getPermissions()[permission];
   }
+
+  /**
+   * Get redirect URL based on user role
+   * Used after successful login to redirect to appropriate dashboard
+   */
+  getRedirectUrlByRole(): string {
+    const role = this.getUserRole();
+
+    switch (role) {
+      case 'Admin':
+        // Admin goes to administration panel
+        return '/parametres/administration';
+
+      case 'Pilot':
+        // Pilot goes to their plans
+        return '/mes-plans';
+
+      case 'Responsable':
+        // Responsable goes to their assigned actions
+        return '/mes-actions';
+
+      case 'Consultant':
+        // Consultant goes to statistics (read-only)
+        return '/statistiques';
+
+      case 'Redacteur':
+        // Redacteur goes to plans where they can create actions
+        return '/mes-plans';
+
+      default:
+        // Default fallback
+        return '/plans-usine';
+    }
+  }
 }

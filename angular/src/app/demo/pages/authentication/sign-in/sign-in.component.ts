@@ -56,8 +56,14 @@ export class SignInComponent {
     this.authService.login(credentials).subscribe({
       next: (response) => {
         console.log('Login successful:', response.user);
-        // Redirect to Plans d'Action Usine after successful login
-        this.router.navigate(['/plans-usine']);
+        console.log('User role:', response.user.role);
+
+        // Get redirect URL based on user role
+        const redirectUrl = this.authService.getRedirectUrlByRole();
+        console.log('Redirecting to:', redirectUrl);
+
+        // Redirect based on user role
+        this.router.navigate([redirectUrl]);
       },
       error: (error) => {
         console.error('Login failed:', error);
