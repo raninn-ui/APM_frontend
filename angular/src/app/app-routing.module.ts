@@ -185,7 +185,7 @@ const routes: Routes = [
           },
           {
             path: 'administration',
-            loadComponent: () => import('./demo/other/sample-page/sample-page.component').then((c) => c.SamplePageComponent)
+            loadComponent: () => import('./demo/gestion-employes/employee-details/employee-details.component').then((c) => c.EmployeeDetailsComponent)
           },
           {
             path: 'gestion-employes',
