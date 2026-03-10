@@ -1,6 +1,6 @@
 import { Injectable, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, BehaviorSubject } from 'rxjs';
+import { Observable } from 'rxjs';
 import { tap, catchError } from 'rxjs/operators';
 import { of } from 'rxjs';
 
@@ -49,17 +49,12 @@ export interface RolePermissions {
 export class AuthService {
   private readonly TOKEN_KEY = 'auth_token';
   private readonly USER_KEY = 'auth_user';
-  private readonly API_URL = 'http://localhost:3000/api/auth'; // TODO: Change to your API URL
 
   // Signals for reactive state
   isLoggedIn = signal(this.hasToken());
   currentUser = signal<User | null>(this.getStoredUser());
   isLoading = signal(false);
   error = signal<string | null>(null);
-
-  // BehaviorSubject for backward compatibility
-  private userSubject = new BehaviorSubject<User | null>(this.getStoredUser());
-  public user$ = this.userSubject.asObservable();
 
   constructor(private http: HttpClient) {
     // Check if user is already logged in on service initialization
@@ -81,14 +76,6 @@ export class AuthService {
     this.isLoading.set(true);
     this.error.set(null);
 
-    // TODO: Replace with actual API call when Personne A provides the endpoint
-    // return this.http.post<LoginResponse>(`${this.API_URL}/login`, credentials).pipe(
-    //   tap(response => this.handleLoginSuccess(response)),
-    //   catchError(error => this.handleLoginError(error))
-    // );
-
-    // Mock API response for now
-    // Determine role based on email (for testing different roles)
     const role = this.getRoleByEmail(credentials.email);
 
     const mockResponse: LoginResponse = {
@@ -100,8 +87,6 @@ export class AuthService {
         role: role
       }
     };
-
-    console.log('🔐 Mock Login:', { email: credentials.email, role });
 
     return of(mockResponse).pipe(
       tap(response => this.handleLoginSuccess(response)),
@@ -149,7 +134,6 @@ export class AuthService {
     }
 
     // Default role for any other email
-    console.warn(`⚠️ Unknown email: ${email}. Assigning default role: Redacteur`);
     return 'Redacteur';
   }
 
@@ -161,9 +145,7 @@ export class AuthService {
     this.saveUser(response.user);
     this.isLoggedIn.set(true);
     this.currentUser.set(response.user);
-    this.userSubject.next(response.user);
     this.isLoading.set(false);
-    console.log('Login successful:', response.user);
   }
 
   /**
@@ -185,9 +167,7 @@ export class AuthService {
     this.removeUser();
     this.isLoggedIn.set(false);
     this.currentUser.set(null);
-    this.userSubject.next(null);
     this.error.set(null);
-    console.log('User logged out');
   }
 
   /**

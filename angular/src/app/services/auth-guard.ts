@@ -15,13 +15,9 @@ export const authGuard: CanActivateFn = (route, state) => {
 
   // Check if user is authenticated
   if (!authService.isAuthenticated()) {
-    console.warn('❌ Access denied - User not authenticated');
-    console.warn('Redirecting to /login');
     router.navigate(['/login']);
     return false;
   }
-
-  console.log('✅ User is authenticated');
 
   // Check if route requires specific role
   const requiredRoles = route.data['roles'] as string[] | undefined;
@@ -30,16 +26,9 @@ export const authGuard: CanActivateFn = (route, state) => {
     const userRole = authService.getUserRole();
 
     if (!userRole || !requiredRoles.includes(userRole)) {
-      console.warn('❌ Access denied - Insufficient permissions');
-      console.warn('Required roles:', requiredRoles);
-      console.warn('User role:', userRole);
-
-      // Redirect to unauthorized page
       router.navigate(['/unauthorized']);
       return false;
     }
-
-    console.log('✅ User has required role:', userRole);
   }
 
   // Check if route requires specific permission
@@ -49,12 +38,9 @@ export const authGuard: CanActivateFn = (route, state) => {
     const hasPermission = authService.hasPermission(requiredPermission as any);
 
     if (!hasPermission) {
-      console.warn('❌ Access denied - Missing permission:', requiredPermission);
       router.navigate(['/unauthorized']);
       return false;
     }
-
-    console.log('✅ User has permission:', requiredPermission);
   }
 
   return true;

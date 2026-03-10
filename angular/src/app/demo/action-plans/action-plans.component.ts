@@ -352,13 +352,11 @@ export class ActionPlansComponent {
     // Redacteur cannot delete plans
     if (userRole === 'Redacteur') {
       alert('❌ Vous n\'avez pas la permission de supprimer un plan. Seul le Pilote peut supprimer les plans.');
-      console.warn('⚠️ Redacteur attempted to delete plan:', id);
       return;
     }
 
     if (confirm('Êtes-vous sûr de vouloir supprimer ce plan?')) {
       this.actionPlans.update(plans => plans.filter(p => p.id !== id));
-      console.log(`✅ Plan ${id} deleted by ${userRole}`);
     }
   }
 
@@ -423,8 +421,7 @@ export class ActionPlansComponent {
   }
 
   addAction(): void {
-    // TODO: Open modal to add new action
-    console.log('Add action to plan:', this.selectedPlan()?.id);
+    // Open modal to add new action
   }
 
   deleteAction(actionId: number): void {
@@ -458,7 +455,6 @@ export class ActionPlansComponent {
     // Redacteur cannot close plans
     if (userRole === 'Redacteur') {
       alert('❌ Vous n\'avez pas la permission de clôturer un plan. Seul le Pilote peut clôturer les plans.');
-      console.warn('⚠️ Redacteur attempted to close plan:', plan?.id);
       return;
     }
 
@@ -467,7 +463,6 @@ export class ActionPlansComponent {
       this.selectedPlan.set({ ...plan });
       const updatedPlans = this.actionPlans().map(p => p.id === plan.id ? plan : p);
       this.actionPlans.set(updatedPlans);
-      console.log(`✅ Plan ${plan.id} closed by ${userRole}`);
     }
   }
 

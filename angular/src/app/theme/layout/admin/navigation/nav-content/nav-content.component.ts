@@ -123,11 +123,8 @@ export class NavContentComponent implements OnInit {
     const userRole = this.authService.getUserRole();
 
     if (!userRole) {
-      console.warn('⚠️ No user role found. Showing no navigation items.');
       return [];
     }
-
-    console.log(`🔐 Filtering navigation for role: ${userRole}`);
 
     return items
       .filter(item => {
