@@ -1,0 +1,262 @@
+// Employee Details Component Styles
+
+// Employee Info Container Styles - New smooth design
+.employee-info-container {
+  display: flex;
+  align-items: flex-start;
+  gap: 1.5rem;
+  padding: 0.5rem;
+
+  .employee-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #4099ff 0%, #73b4ff 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 4px 15px rgba(64, 153, 255, 0.3);
+
+    i {
+      font-size: 2.5rem;
+      color: white;
+    }
+  }
+
+  .employee-details {
+    flex: 1;
+
+    .employee-name {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: #212529;
+      margin-bottom: 0.5rem;
+    }
+
+    .employee-meta {
+      margin-bottom: 1rem;
+    }
+
+    .employee-fields {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+
+      .field-group {
+        display: flex;
+        flex-direction: column;
+        min-width: 150px;
+
+        .field-label {
+          font-size: 0.75rem;
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+          color: #6c757d;
+          margin-bottom: 0.25rem;
+        }
+
+        .field-value {
+          font-size: 0.95rem;
+          color: #212529;
+          font-weight: 500;
+
+          code {
+            background-color: #e9ecef;
+            padding: 0.2rem 0.5rem;
+            border-radius: 0.25rem;
+            font-family: 'Courier New', monospace;
+            font-size: 0.85rem;
+            color: #495057;
+          }
+        }
+      }
+    }
+  }
+}
+
+// Responsive for employee info
+@media (max-width: 767.98px) {
+  .employee-info-container {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+
+    .employee-details {
+      .employee-fields {
+        justify-content: center;
+      }
+    }
+  }
+}
+
+// Dual List Container Styles
+.dual-list-container {
+  display: flex;
+  gap: 1rem;
+  align-items: stretch;
+  margin-bottom: 1.5rem;
+
+  @media (max-width: 768px) {
+    flex-direction: column;
+  }
+
+  .list-box {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #dee2e6;
+    border-radius: 0.5rem;
+    overflow: hidden;
+
+    .list-box-title {
+      background-color: #f8f9fa;
+      padding: 0.75rem 1rem;
+      margin: 0;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #495057;
+      border-bottom: 1px solid #dee2e6;
+    }
+
+    .list-box-content {
+      flex: 1;
+      min-height: 250px;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+  }
+
+  .center-buttons {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.5rem;
+
+    @media (max-width: 768px) {
+      flex-direction: row;
+    }
+
+    .btn-move {
+      width: 40px;
+      height: 40px;
+      padding: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 0.25rem;
+
+      &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+    }
+  }
+}
+
+// Role List Styles
+.role-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+
+  .role-item {
+    padding: 0.75rem 1rem;
+    cursor: pointer;
+    border-bottom: 1px solid #f0f0f0;
+    transition: background-color 0.2s ease, padding-left 0.2s ease;
+
+    &:hover {
+      background-color: #f1f8ff;
+      padding-left: 1.25rem;
+    }
+
+    &.selected {
+      background-color: #e3f2fd;
+      border-left: 3px solid #2196f3;
+      font-weight: 500;
+    }
+
+    &.empty-message {
+      color: #6c757d;
+      font-style: italic;
+      cursor: default;
+      text-align: center;
+      padding: 2rem 1rem;
+
+      &:hover {
+        background-color: transparent;
+        padding-left: 1rem;
+      }
+    }
+
+    &:last-child {
+      border-bottom: none;
+    }
+  }
+}
+
+// Save Button Container
+.save-button-container {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 1rem;
+  border-top: 1px solid #dee2e6;
+}
+
+// Form Styles for Edit Panel
+app-card {
+  .form-label {
+    font-weight: 500;
+    color: #495057;
+    margin-bottom: 0.5rem;
+  }
+
+  .form-control,
+  .form-select {
+    border: 1px solid #ced4da;
+    border-radius: 0.375rem;
+    padding: 0.5rem 0.75rem;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+    &:focus {
+      border-color: #4099ff;
+      box-shadow: 0 0 0 0.2rem rgba(64, 153, 255, 0.25);
+    }
+
+    &[readonly] {
+      background-color: #e9ecef;
+      cursor: not-allowed;
+      color: #6c757d;
+    }
+  }
+
+  .btn-primary {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.625rem 1rem;
+    font-weight: 500;
+  }
+}
+
+// Responsive Adjustments
+@media (max-width: 991.98px) {
+  .dual-list-container {
+    .list-box {
+      .list-box-content {
+        min-height: 200px;
+        max-height: 250px;
+      }
+    }
+  }
+}
+
+@media (max-width: 767.98px) {
+  .employee-info-grid {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  }
+}
+

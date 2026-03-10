@@ -1,0 +1,170 @@
+<div class="row">
+  <div class="col-xl-12">
+    <!-- Header Information Section -->
+    <app-card cardTitle="Informations de l'employé" class="mb-4">
+      <div class="employee-info-container">
+        <div class="employee-avatar">
+          <i class="feather icon-user"></i>
+        </div>
+        <div class="employee-details">
+          <div class="employee-name">{{ employeeInfo().prenom }} {{ employeeInfo().nom }}</div>
+          <div class="employee-meta">
+            <span class="badge bg-primary">{{ employeeInfo().responsable }}</span>
+          </div>
+          <div class="employee-fields">
+            <div class="field-group">
+              <span class="field-label">Matricule</span>
+              <span class="field-value">{{ employeeInfo().matricule }}</span>
+            </div>
+            <div class="field-group">
+              <span class="field-label">Email</span>
+              <span class="field-value">{{ employeeInfo().email }}</span>
+            </div>
+            <div class="field-group">
+              <span class="field-label">Responsable</span>
+              <span class="field-value">{{ employeeInfo().responsable }}</span>
+            </div>
+            <div class="field-group">
+              <span class="field-label">Compte Windows</span>
+              <span class="field-value"><code>{{ employeeInfo().windowsAccount }}</code></span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </app-card>
+
+    <!-- Main Content: 2-Column Layout -->
+    <div class="row">
+      <!-- Left Side (70%): Access Rights Assignment -->
+      <div class="col-lg-8">
+        <app-card cardTitle="Affectation des Droits d'accès">
+          <div class="dual-list-container">
+            <!-- Left Box: Available Roles -->
+            <div class="list-box">
+              <h6 class="list-box-title">Rôles disponibles</h6>
+              <div class="list-box-content">
+                <ul class="role-list">
+                  @for (role of availableRoles(); track role) {
+                    <li 
+                      class="role-item" 
+                      [class.selected]="selectedAvailableRole() === role"
+                      (click)="selectAvailableRole(role)">
+                      {{ role }}
+                    </li>
+                  }
+                  @if (availableRoles().length === 0) {
+                    <li class="role-item empty-message">Aucun rôle disponible</li>
+                  }
+                </ul>
+              </div>
+            </div>
+
+            <!-- Center Buttons -->
+            <div class="center-buttons">
+              <button 
+                class="btn btn-primary btn-move" 
+                (click)="moveToAssigned()"
+                [disabled]="!selectedAvailableRole()"
+                title="Assigner le rôle">
+                <i class="feather icon-chevron-right"></i>
+              </button>
+              <button 
+                class="btn btn-primary btn-move" 
+                (click)="moveToAvailable()"
+                [disabled]="!selectedAssignedRole()"
+                title="Retirer le rôle">
+                <i class="feather icon-chevron-left"></i>
+              </button>
+            </div>
+
+            <!-- Right Box: Assigned Roles -->
+            <div class="list-box">
+              <h6 class="list-box-title">Rôles assignés</h6>
+              <div class="list-box-content">
+                <ul class="role-list">
+                  @for (role of assignedRoles(); track role) {
+                    <li 
+                      class="role-item" 
+                      [class.selected]="selectedAssignedRole() === role"
+                      (click)="selectAssignedRole(role)">
+                      {{ role }}
+                    </li>
+                  }
+                  @if (assignedRoles().length === 0) {
+                    <li class="role-item empty-message">Aucun rôle assigné</li>
+                  }
+                </ul>
+              </div>
+            </div>
+          </div>
+
+          <!-- Save Button -->
+          <div class="save-button-container">
+            <button class="btn btn-success" (click)="saveAccessRights()">
+              <i class="feather icon-check"></i> Enregistrer
+            </button>
+          </div>
+        </app-card>
+      </div>
+
+      <!-- Right Side (30%): Edit Employee Information -->
+      <div class="col-lg-4">
+        <app-card cardTitle="Modifier Informations">
+          <form>
+            <div class="mb-3">
+              <label class="form-label">Nom</label>
+              <input 
+                type="text" 
+                class="form-control" 
+                [(ngModel)]="editableEmployee().nom" 
+                name="nom">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Prenom</label>
+              <input 
+                type="text" 
+                class="form-control" 
+                [(ngModel)]="editableEmployee().prenom" 
+                name="prenom">
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Responsable</label>
+              <select 
+                class="form-select" 
+                [(ngModel)]="editableEmployee().responsable" 
+                name="responsable">
+                <option value="">Sélectionner...</option>
+                @for (resp of responsables; track resp) {
+                  <option [value]="resp">{{ resp }}</option>
+                }
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Session Windows</label>
+              <input 
+                type="text" 
+                class="form-control" 
+                [(ngModel)]="editableEmployee().sessionWindows" 
+                name="sessionWindows"
+                readonly>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Email</label>
+              <input 
+                type="email" 
+                class="form-control" 
+                [(ngModel)]="editableEmployee().email" 
+                name="email">
+            </div>
+            <div class="d-grid">
+              <button class="btn btn-primary" (click)="updateEmployee()">
+                <i class="feather icon-edit"></i> Modifier
+              </button>
+            </div>
+          </form>
+        </app-card>
+      </div>
+    </div>
+  </div>
+</div>
+
