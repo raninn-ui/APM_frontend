@@ -1,8 +1,8 @@
 import { Injectable, signal } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
-import { tap, catchError } from 'rxjs/operators';
-import { of } from 'rxjs';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { Observable, throwError } from 'rxjs';
+import { catchError, map, tap } from 'rxjs/operators';
+import { environment } from 'src/environments/environment';
 
 export interface LoginRequest {
   email: string;
@@ -11,22 +11,32 @@ export interface LoginRequest {
 
 export interface LoginResponse {
   token: string;
-  user: {
-    id: string;
-    email: string;
-    name: string;
-    role: 'Admin' | 'Pilot' | 'Responsable' | 'Consultant' | 'Redacteur';
-  };
+  user: User;
 }
 
 export interface User {
   id: string;
   email: string;
   name: string;
-  role: 'Admin' | 'Pilot' | 'Responsable' | 'Consultant' | 'Redacteur';
+  role: UserRole | null;
+  roles: UserRole[];
 }
 
 export type UserRole = 'Admin' | 'Pilot' | 'Responsable' | 'Consultant' | 'Redacteur';
+
+interface ApiLoginResponse {
+  token: string;
+  expiresAt: string;
+  user: {
+    id: number | string;
+    username: string;
+    email: string;
+    firstName: string;
+    lastName: string;
+    isActive: boolean;
+    roles: string[];
+  };
+}
 
 export interface RolePermissions {
   canCreatePlans: boolean;
@@ -49,6 +59,8 @@ export interface RolePermissions {
 export class AuthService {
   private readonly TOKEN_KEY = 'auth_token';
   private readonly USER_KEY = 'auth_user';
+  private readonly authApiUrl = `${environment.apiUrl}/api/auth`;
+  private readonly rolePriority: UserRole[] = ['Admin', 'Pilot', 'Responsable', 'Consultant', 'Redacteur'];
 
   // Signals for reactive state
   isLoggedIn = signal(this.hasToken());
@@ -76,65 +88,51 @@ export class AuthService {
     this.isLoading.set(true);
     this.error.set(null);
 
-    const role = this.getRoleByEmail(credentials.email);
-
-    const mockResponse: LoginResponse = {
-      token: 'mock_token_' + Date.now(),
-      user: {
-        id: '1',
-        email: credentials.email,
-        name: credentials.email.split('@')[0],
-        role: role
-      }
-    };
-
-    return of(mockResponse).pipe(
-      tap(response => this.handleLoginSuccess(response)),
-      catchError(error => this.handleLoginError(error))
+    return this.http.post<ApiLoginResponse>(`${this.authApiUrl}/login`, credentials).pipe(
+      map((response) => this.mapLoginResponse(response)),
+      tap((response) => this.handleLoginSuccess(response)),
+      catchError((error) => this.handleLoginError(error))
     );
   }
 
-  /**
-   * Determine user role based on email (for testing)
-   * In production, this will be provided by the backend
-   *
-   * Test Accounts:
-   * - admin@example.com → Admin
-   * - pilot@example.com → Pilot
-   * - responsable@example.com → Responsable
-   * - consultant@example.com → Consultant
-   * - redacteur@example.com → Redacteur
-   */
-  private getRoleByEmail(email: string): UserRole {
-    const emailLower = email.toLowerCase().trim();
+  private mapLoginResponse(response: ApiLoginResponse): LoginResponse {
+    const roles = (response.user.roles ?? [])
+      .map((role) => this.mapRole(role))
+      .filter((role): role is UserRole => role !== null);
 
-    // Admin account
-    if (emailLower === 'admin@example.com') {
-      return 'Admin';
+    return {
+      token: response.token,
+      user: {
+        id: String(response.user.id),
+        email: response.user.email ?? '',
+        name: [response.user.firstName, response.user.lastName].filter(Boolean).join(' ').trim() || response.user.username,
+        role: this.getPrimaryRole(roles),
+        roles
+      }
+    };
+  }
+
+  private mapRole(role: string): UserRole | null {
+    switch (role.trim().toLowerCase()) {
+      case 'administrateur':
+        return 'Admin';
+      case 'pilote':
+        return 'Pilot';
+      case 'responsable':
+        return 'Responsable';
+      case 'consultateur':
+      case 'consultant':
+        return 'Consultant';
+      case 'rédacteur':
+      case 'redacteur':
+        return 'Redacteur';
+      default:
+        return null;
     }
+  }
 
-    // Pilot account
-    if (emailLower === 'pilot@example.com') {
-      return 'Pilot';
-    }
-
-    // Responsable account
-    if (emailLower === 'responsable@example.com') {
-      return 'Responsable';
-    }
-
-    // Consultant account
-    if (emailLower === 'consultant@example.com') {
-      return 'Consultant';
-    }
-
-    // Redacteur account (default)
-    if (emailLower === 'redacteur@example.com') {
-      return 'Redacteur';
-    }
-
-    // Default role for any other email
-    return 'Redacteur';
+  private getPrimaryRole(roles: UserRole[]): UserRole | null {
+    return this.rolePriority.find((role) => roles.includes(role)) ?? null;
   }
 
   /**
@@ -151,12 +149,11 @@ export class AuthService {
   /**
    * Handle login error
    */
-  private handleLoginError(error: any): Observable<never> {
+  private handleLoginError(error: HttpErrorResponse): Observable<never> {
     this.isLoading.set(false);
-    const errorMessage = error?.error?.message || 'Login failed. Please try again.';
+    const errorMessage = error.error?.message || 'Login failed. Please try again.';
     this.error.set(errorMessage);
-    console.error('Login error:', errorMessage);
-    throw error;
+    return throwError(() => error);
   }
 
   /**
@@ -210,7 +207,24 @@ export class AuthService {
    */
   getStoredUser(): User | null {
     const user = localStorage.getItem(this.USER_KEY);
-    return user ? JSON.parse(user) : null;
+    if (!user) {
+      return null;
+    }
+
+    const parsedUser = JSON.parse(user) as Partial<User>;
+    const roles = Array.isArray(parsedUser.roles)
+      ? parsedUser.roles
+      : parsedUser.role
+        ? [parsedUser.role]
+        : [];
+
+    return {
+      id: String(parsedUser.id ?? ''),
+      email: parsedUser.email ?? '',
+      name: parsedUser.name ?? '',
+      role: this.getPrimaryRole(roles),
+      roles
+    };
   }
 
   /**
@@ -242,19 +256,24 @@ export class AuthService {
     return user ? user.role : null;
   }
 
+  getUserRoles(): UserRole[] {
+    const user = this.getCurrentUser();
+    return user ? user.roles : [];
+  }
+
   /**
    * Check if user has specific role
    */
   hasRole(role: UserRole): boolean {
-    return this.getUserRole() === role;
+    return this.getUserRoles().includes(role);
   }
 
   /**
    * Check if user has any of the specified roles
    */
   hasAnyRole(roles: UserRole[]): boolean {
-    const userRole = this.getUserRole();
-    return userRole ? roles.includes(userRole) : false;
+    const userRoles = this.getUserRoles();
+    return roles.some((role) => userRoles.includes(role));
   }
 
   /**

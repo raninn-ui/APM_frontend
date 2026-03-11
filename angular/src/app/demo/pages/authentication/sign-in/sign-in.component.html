@@ -58,6 +58,11 @@
                   <label for="checkbox-fill-a1" class="cr">Se souvenir de moi</label>
                 </div>
               </div>
+              @if (error()) {
+                <div class="alert alert-danger text-start mb-3" role="alert">
+                  <i class="ti ti-alert-circle me-2"></i>{{ error() }}
+                </div>
+              }
               <div class="d-grid">
                 <button type="submit" class="btn btn-block btn-primary mb-4">Se connecter</button>
               </div>
@@ -65,33 +70,6 @@
                 Mot de passe oublié?
                 <a [routerLink]="['/forgot-password']" class="f-w-400">Réinitialiser</a>
               </p>
-
-              <!-- Test Accounts Section (Development Only) -->
-              <hr class="my-4" />
-              <div class="test-accounts-section">
-                <p class="text-muted small mb-3">
-                  <i class="feather icon-alert-circle"></i>
-                  <strong>Comptes de Test (Développement)</strong>
-                </p>
-                <div class="test-buttons-grid">
-                  @for (account of testAccounts; track account.email) {
-                    <button
-                      type="button"
-                      class="btn btn-sm btn-outline-secondary test-account-btn"
-                      (click)="fillTestAccount(account.email)"
-                      title="{{ account.description }}"
-                    >
-                      <small>
-                        <strong>{{ account.role }}</strong><br />
-                        {{ account.email }}
-                      </small>
-                    </button>
-                  }
-                </div>
-                <p class="text-muted small mt-2">
-                  Password: <code>password123</code>
-                </p>
-              </div>
             </form>
           </div>
         </div>

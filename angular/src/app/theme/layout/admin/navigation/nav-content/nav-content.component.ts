@@ -120,9 +120,9 @@ export class NavContentComponent implements OnInit {
    * Only show menu items that the user's role is allowed to see
    */
   private filterNavigationByRole(items: NavigationItem[]): NavigationItem[] {
-    const userRole = this.authService.getUserRole();
+    const userRoles = this.authService.getUserRoles();
 
-    if (!userRole) {
+    if (userRoles.length === 0) {
       return [];
     }
 
@@ -132,8 +132,7 @@ export class NavContentComponent implements OnInit {
         if (!item.roles || item.roles.length === 0) {
           return true;
         }
-        // Show item only if user's role is in the allowed roles
-        return item.roles.includes(userRole);
+        return item.roles.some((role) => userRoles.includes(role as any));
       })
       .map(item => {
         // Recursively filter children
