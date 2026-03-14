@@ -1,6 +1,7 @@
 // angular import
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { animate, style, transition, trigger } from '@angular/animations';
+import { Router } from '@angular/router';
 
 // bootstrap import
 import { NgbDropdownConfig } from '@ng-bootstrap/ng-bootstrap';
@@ -9,6 +10,7 @@ import { NgbDropdownConfig } from '@ng-bootstrap/ng-bootstrap';
 import { SharedModule } from 'src/app/theme/shared/shared.module';
 import { ChatUserListComponent } from './chat-user-list/chat-user-list.component';
 import { ChatMsgComponent } from './chat-msg/chat-msg.component';
+import { AuthService } from 'src/app/services/auth';
 
 @Component({
   selector: 'app-nav-right',
@@ -28,6 +30,9 @@ import { ChatMsgComponent } from './chat-msg/chat-msg.component';
   ]
 })
 export class NavRightComponent {
+  private authService = inject(AuthService);
+  private router = inject(Router);
+
   // public props
   visibleUserList: boolean;
   chatMessage: boolean;
@@ -37,6 +42,11 @@ export class NavRightComponent {
   constructor() {
     this.visibleUserList = false;
     this.chatMessage = false;
+  }
+
+  logout(): void {
+    this.authService.logout();
+    this.router.navigate(['/login']);
   }
 
   // public method

@@ -1,26 +1,9 @@
-import { Component, signal } from '@angular/core';
+import { Component, inject, signal, OnInit, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-
-// project import
+import { ActivatedRoute } from '@angular/router';
+import { HttpClient } from '@angular/common/http';
 import { CardComponent } from 'src/app/theme/shared/components/card/card.component';
-
-interface EmployeeInfo {
-  matricule: string;
-  nom: string;
-  prenom: string;
-  responsable: string;
-  email: string;
-  windowsAccount: string;
-}
-
-interface EditableEmployee {
-  nom: string;
-  prenom: string;
-  responsable: string;
-  sessionWindows: string;
-  email: string;
-}
 
 @Component({
   selector: 'app-employee-details',
@@ -29,119 +12,136 @@ interface EditableEmployee {
   templateUrl: './employee-details.component.html',
   styleUrls: ['./employee-details.component.scss']
 })
-export class EmployeeDetailsComponent {
-  // Employee information (dummy data)
-  employeeInfo = signal<EmployeeInfo>({
-    matricule: '544025',
-    nom: 'ABIDI',
-    prenom: 'JEZIA',
-    responsable: 'FATMA BEN NEJI',
-    email: 'example@email.com',
-    windowsAccount: 'G544025'
-  });
+export class EmployeeDetailsComponent implements OnInit {
+  private http = inject(HttpClient);
+  private route = inject(ActivatedRoute);
+  apiUrl = 'http://localhost:5128/api';
 
-  // Editable employee form data
-  editableEmployee = signal<EditableEmployee>({
-    nom: 'ABIDI',
-    prenom: 'JEZIA',
-    responsable: 'FATMA BEN NEJI',
-    sessionWindows: 'G544025',
-    email: 'example@email.com'
-  });
+  matricule = signal<number>(0);
+  employeeInfo = signal<any>({});
+  editableEmployee = signal<any>({ Nom: '', Prenom: '', Email: '', Responsable: null });
+  availableRoles = signal<any[]>([]);
+  assignedRoles = signal<any[]>([]);
+  selectedAvailableRole = signal<any>(null);
+  selectedAssignedRole = signal<any>(null);
+  employeesForDropdown = signal<any[]>([]);
+  servicesForDropdown = signal<any[]>([]);
+  selectedServices = signal<string[]>([]);
+  selectedServiceTags = computed(() => this.servicesForDropdown().filter(s => this.selectedServices().includes(s.code)));
+  serviceLabels = computed(() =>
+    this.selectedServiceTags().length > 0
+      ? this.selectedServiceTags().map(s => s.lib).join(', ')
+      : 'Aucun'
+  );
+  allEmployees = signal<any[]>([]);
+  searchTerm = signal('');
+  filteredSearch = computed(() => this.allEmployees().filter(emp =>
+    emp.nom.toLowerCase().includes(this.searchTerm().toLowerCase()) ||
+    emp.prenom.toLowerCase().includes(this.searchTerm().toLowerCase()) ||
+    emp.matricule.toString().includes(this.searchTerm())
+  ));
 
-  // Available roles (left list)
-  availableRoles = signal<string[]>([
-    'Admin',
-    'Consultation confidentiel',
-    'Statistique',
-    'Directeur',
-    'Création PDCA confidentiel',
-    'Développeur',
-    'Recevoir mail de relance',
-    'Création PDCA collective',
-    'Modérateur',
-    'Suivi Actions'
-  ]);
+  ngOnInit(): void {
+    const mat = Number(this.route.snapshot.paramMap.get('matricule'));
+    this.matricule.set(mat);
+    this.loadDropdowns(mat);
+  }
 
-  // Assigned roles (right list)
-  assignedRoles = signal<string[]>([
-    'Pilote',
-    'Responsable',
-    'Consultation',
-    'Rédacteur'
-  ]);
+  loadDropdowns(mat: number): void {
+    this.http.get<any[]>(`${this.apiUrl}/employees/full`).subscribe(employees => {
+      this.employeesForDropdown.set(employees.map(e => ({ id: e.matricule, name: e.nom + ' ' + e.prenom })));
+      this.allEmployees.set(employees);
+      const emp = employees.find(e => e.matricule === mat);
+      if (emp) {
+        this.employeeInfo.set({
+          matricule: emp.matricule,
+          nom: emp.nom,
+          prenom: emp.prenom,
+          responsable: emp.responsableName || 'Aucun',
+          email: emp.email,
+          compteWin: emp.compteWin
+        });
+        this.editableEmployee.set({
+          Nom: emp.nom,
+          Prenom: emp.prenom,
+          Email: emp.email,
+          Responsable: emp.responsableMatricule || null
+        });
+        const currentCodes = emp.serviceCodes || [];
+        this.selectedServices.set(currentCodes);
+      }
+    });
 
-  // Selected items in lists
-  selectedAvailableRole = signal<string | null>(null);
-  selectedAssignedRole = signal<string | null>(null);
+    this.http.get<any[]>(`${this.apiUrl}/employees/services`).subscribe(services => {
+      this.servicesForDropdown.set(services);
+    });
 
-  // Options for responsable dropdown
-  responsables = [
-    'FATMA BEN NEJI',
-    'ALI BEN AHMED',
-    'MOHAMED BEN SALAH',
-    'SAMI BEN KHALIFA',
-    'NOUREDDINE BEN AMOR'
-  ];
+    this.http.get<any[]>(`${this.apiUrl}/employees/roles`).subscribe(roles => {
+      this.http.get<number[]>(`${this.apiUrl}/employees/${mat}/roles`).subscribe(assignedIds => {
+        this.assignedRoles.set(roles.filter(r => assignedIds.includes(r.id)));
+        this.availableRoles.set(roles.filter(r => !assignedIds.includes(r.id)));
+      });
+    });
+  }
 
-  // Move role from available to assigned
   moveToAssigned(): void {
-    const selectedRole = this.selectedAvailableRole();
-    if (selectedRole) {
-      this.assignedRoles.update(roles => [...roles, selectedRole]);
-      this.availableRoles.update(roles => roles.filter(r => r !== selectedRole));
+    const s = this.selectedAvailableRole();
+    if (s) {
+      this.assignedRoles.update(r => [...r, s]);
+      this.availableRoles.update(r => r.filter(x => x.id !== s.id));
       this.selectedAvailableRole.set(null);
     }
   }
 
-  // Move role from assigned to available
   moveToAvailable(): void {
-    const selectedRole = this.selectedAssignedRole();
-    if (selectedRole) {
-      this.availableRoles.update(roles => [...roles, selectedRole]);
-      this.assignedRoles.update(roles => roles.filter(r => r !== selectedRole));
+    const s = this.selectedAssignedRole();
+    if (s) {
+      this.availableRoles.update(r => [...r, s]);
+      this.assignedRoles.update(r => r.filter(x => x.id !== s.id));
       this.selectedAssignedRole.set(null);
     }
   }
 
-  // Select a role from available list
-  selectAvailableRole(role: string): void {
+  selectAvailableRole(role: any): void {
     this.selectedAvailableRole.set(role);
     this.selectedAssignedRole.set(null);
   }
 
-  // Select a role from assigned list
-  selectAssignedRole(role: string): void {
+  selectAssignedRole(role: any): void {
     this.selectedAssignedRole.set(role);
     this.selectedAvailableRole.set(null);
   }
 
-  // Save access rights
-  saveAccessRights(): void {
-    console.log('Saving access rights:', {
-      available: this.availableRoles(),
-      assigned: this.assignedRoles()
-    });
-    // UI only - no backend logic
-    alert('Droits d\'accès enregistrés avec succès!');
+  toggleService(code: string): void {
+    const current = this.selectedServices();
+    if (current.includes(code)) {
+      this.selectedServices.set(current.filter(c => c !== code));
+    } else {
+      this.selectedServices.set([...current, code]);
+    }
   }
 
-  // Update employee information
+  saveAccessRights(): void {
+    const ids = this.assignedRoles().map(r => r.id);
+    this.http.put(`${this.apiUrl}/employees/${this.matricule()}/roles`, ids).subscribe({
+      next: () => alert('Droits enregistrés!'),
+      error: (err) => alert('Erreur: ' + JSON.stringify(err.error))
+    });
+  }
+
+  navigateToEmployee(mat: number): void {
+    window.location.href = `/parametres/administration/${mat}`;
+  }
+
   updateEmployee(): void {
-    const emp = this.editableEmployee();
-    
-    // Update the employee info display
-    this.employeeInfo.update(info => ({
-      ...info,
-      nom: emp.nom,
-      prenom: emp.prenom,
-      responsable: emp.responsable,
-      email: emp.email,
-      windowsAccount: emp.sessionWindows
-    }));
-    
-    // UI only - no backend logic
-    alert('Informations employée mises à jour avec succès!');
+    this.http.put(`${this.apiUrl}/employees/${this.matricule()}`, this.editableEmployee()).subscribe({
+      next: () => {
+        this.http.put(`${this.apiUrl}/employees/${this.matricule()}/services`, this.selectedServices()).subscribe({
+          next: () => alert('Mis à jour!'),
+          error: (err) => alert('Erreur services: ' + JSON.stringify(err.error))
+        });
+      },
+      error: (err) => alert('Erreur: ' + JSON.stringify(err.error))
+    });
   }
 }
-

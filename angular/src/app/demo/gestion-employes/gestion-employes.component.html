@@ -8,22 +8,20 @@
       </button>
     </div>
 
-    <!-- Search Bar -->
     <div class="row mb-4">
       <div class="col-md-6">
         <div class="input-group">
           <span class="input-group-text"><i class="feather icon-search"></i></span>
-          <input 
-            type="text" 
-            class="form-control" 
-            placeholder="Rechercher par matricule..." 
+          <input
+            type="text"
+            class="form-control"
+            placeholder="Rechercher par nom, prénom ou matricule..."
             [(ngModel)]="searchTerm"
-            (input)="searchEmployees()">
+            (input)="filterEmployees($event)">
         </div>
       </div>
     </div>
 
-    <!-- Employees Table -->
     <app-card cardTitle="Liste des employés" blockClass="table-border-style">
       <div class="table-responsive">
         <table class="table table-hover">
@@ -33,7 +31,7 @@
               <th>Nom</th>
               <th>Prénom</th>
               <th>Email</th>
-              <th>Responsabilité</th>
+              <th>Responsable</th>
               <th>Service</th>
               <th>Type Accès</th>
               <th>Session Windows</th>
@@ -42,38 +40,26 @@
           </thead>
           <tbody>
             @for (emp of filteredEmployees(); track emp.id) {
-            <tr>
+            <tr class="cursor-pointer" (click)="goToDetails(emp.matricule)">
               <td><strong>{{ emp.matricule }}</strong></td>
               <td>{{ emp.nom }}</td>
               <td>{{ emp.prenom }}</td>
               <td>{{ emp.email }}</td>
+              <td>{{ emp.responsabilite || 'Aucun' }}</td>
+              <td>{{ emp.serviceLib || 'Aucun' }}</td>
               <td>
-                <span class="badge bg-primary">{{ emp.responsabilite }}</span>
-              </td>
-              <td>{{ emp.service }}</td>
-              <td>
-                <span [class]="'badge ' + (emp.typeAcces === 'Admin' ? 'bg-danger' : 'bg-info')">
-                  {{ emp.typeAcces }}
-                </span>
+                <span *ngFor="let role of emp.typeAcces.split(', ')" class="badge bg-primary me-1">{{ role }}</span>
               </td>
               <td>
                 <span class="badge bg-secondary">{{ emp.sessionWindows }}</span>
               </td>
               <td>
-                <div class="d-flex gap-1">
-                  <button 
-                    class="btn btn-sm btn-info" 
-                    (click)="openEditModal(editEmployeeModal, emp)"
-                    title="Modifier">
-                    <i class="feather icon-edit"></i>
-                  </button>
-                  <button 
-                    class="btn btn-sm btn-danger" 
-                    (click)="deleteEmployee(emp.id)"
-                    title="Supprimer">
-                    <i class="feather icon-trash-2"></i>
-                  </button>
-                </div>
+                <button
+                  class="btn btn-sm btn-danger"
+                  (click)="$event.stopPropagation(); deleteEmployee(emp.id)"
+                  title="Supprimer">
+                  <i class="feather icon-trash-2"></i>
+                </button>
               </td>
             </tr>
             }
@@ -101,208 +87,50 @@
     <form (ngSubmit)="addEmployee(modal)">
       <div class="row">
         <div class="col-md-6 mb-3">
-          <label class="form-label">Matricule <span class="text-danger">*</span></label>
-          <input 
-            type="number" 
-            class="form-control" 
-            [(ngModel)]="newEmployee().matricule" 
-            name="matricule" 
-            required>
-        </div>
-        <div class="col-md-6 mb-3">
           <label class="form-label">Nom <span class="text-danger">*</span></label>
-          <input 
-            type="text" 
-            class="form-control" 
-            [(ngModel)]="newEmployee().nom" 
-            name="nom" 
-            required>
+          <input type="text" class="form-control" [(ngModel)]="newEmployee().nom" name="nom" required>
         </div>
-      </div>
-      <div class="row">
         <div class="col-md-6 mb-3">
           <label class="form-label">Prénom <span class="text-danger">*</span></label>
-          <input 
-            type="text" 
-            class="form-control" 
-            [(ngModel)]="newEmployee().prenom" 
-            name="prenom" 
-            required>
-        </div>
-        <div class="col-md-6 mb-3">
-          <label class="form-label">Email <span class="text-danger">*</span></label>
-          <input 
-            type="email" 
-            class="form-control" 
-            [(ngModel)]="newEmployee().email" 
-            name="email" 
-            required>
+          <input type="text" class="form-control" [(ngModel)]="newEmployee().prenom" name="prenom" required>
         </div>
       </div>
       <div class="row">
         <div class="col-md-6 mb-3">
-          <label class="form-label">Responsabilité</label>
-          <select 
-            class="form-select" 
-            [(ngModel)]="newEmployee().responsabilite" 
-            name="responsabilite">
+          <label class="form-label">Email <span class="text-danger">*</span></label>
+          <input type="email" class="form-control" [(ngModel)]="newEmployee().email" name="email" required>
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">Mot de passe <span class="text-danger">*</span></label>
+          <input type="password" class="form-control" [(ngModel)]="newEmployee().motDePasse" name="motDePasse" required>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label class="form-label">Responsable</label>
+          <select class="form-select" [(ngModel)]="newEmployee().responsabilite" name="responsabilite">
             <option value="">Sélectionner...</option>
-            @for (resp of responsabilites; track resp) {
-              <option [value]="resp">{{ resp }}</option>
+            @for (resp of responsabilites; track resp.id) {
+              <option [value]="resp.id">{{ resp.name }}</option>
             }
           </select>
         </div>
         <div class="col-md-6 mb-3">
           <label class="form-label">Service</label>
-          <select 
-            class="form-select" 
-            [(ngModel)]="newEmployee().service" 
-            name="service">
+          <select class="form-select" [(ngModel)]="newEmployee().service" name="service">
             <option value="">Sélectionner...</option>
-            @for (srv of services; track srv) {
-              <option [value]="srv">{{ srv }}</option>
+            @for (srv of services; track srv.code) {
+              <option [value]="srv.code">{{ srv.lib }}</option>
             }
           </select>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col-md-6 mb-3">
-          <label class="form-label">Type Accès</label>
-          <select 
-            class="form-select" 
-            [(ngModel)]="newEmployee().typeAcces" 
-            name="typeAcces">
-            <option value="">Sélectionner...</option>
-            @for (type of typeAccesOptions; track type) {
-              <option [value]="type">{{ type }}</option>
-            }
-          </select>
-        </div>
-        <div class="col-md-6 mb-3">
-          <label class="form-label">Session Windows</label>
-          <input 
-            type="text" 
-            class="form-control" 
-            [value]="newEmployee().matricule ? 'g' + newEmployee().matricule : ''" 
-            name="sessionWindows" 
-            readonly>
-          <small class="text-muted">Format: g + matricule</small>
         </div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" (click)="modal.dismiss()">
-          Annuler
-        </button>
+        <button type="button" class="btn btn-secondary" (click)="modal.dismiss()">Annuler</button>
         <button type="submit" class="btn btn-primary">
           <i class="feather icon-check"></i> Ajouter
         </button>
       </div>
     </form>
-  </div>
-</ng-template>
-
-<!-- Modal for Editing Employee -->
-<ng-template #editEmployeeModal let-modal>
-  <div class="modal-header">
-    <h5 class="modal-title">Modifier l'employé</h5>
-    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
-  </div>
-  <div class="modal-body">
-    @if (editingEmployee()) {
-    <form (ngSubmit)="updateEmployee(modal)">
-      <div class="row">
-        <div class="col-md-6 mb-3">
-          <label class="form-label">Matricule</label>
-          <input 
-            type="number" 
-            class="form-control" 
-            [value]="editingEmployee()!.matricule" 
-            readonly>
-        </div>
-        <div class="col-md-6 mb-3">
-          <label class="form-label">Nom</label>
-          <input 
-            type="text" 
-            class="form-control" 
-            [value]="editingEmployee()!.nom" 
-            readonly>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col-md-6 mb-3">
-          <label class="form-label">Prénom</label>
-          <input 
-            type="text" 
-            class="form-control" 
-            [value]="editingEmployee()!.prenom" 
-            readonly>
-        </div>
-        <div class="col-md-6 mb-3">
-          <label class="form-label">Email</label>
-          <input 
-            type="email" 
-            class="form-control" 
-            [value]="editingEmployee()!.email" 
-            readonly>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col-md-6 mb-3">
-          <label class="form-label">Responsabilité</label>
-          <select 
-            class="form-select" 
-            [(ngModel)]="editingEmployee()!.responsabilite" 
-            name="editResponsabilite">
-            <option value="">Sélectionner...</option>
-            @for (resp of responsabilites; track resp) {
-              <option [value]="resp">{{ resp }}</option>
-            }
-          </select>
-        </div>
-        <div class="col-md-6 mb-3">
-          <label class="form-label">Service</label>
-          <select 
-            class="form-select" 
-            [(ngModel)]="editingEmployee()!.service" 
-            name="editService">
-            <option value="">Sélectionner...</option>
-            @for (srv of services; track srv) {
-              <option [value]="srv">{{ srv }}</option>
-            }
-          </select>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col-md-6 mb-3">
-          <label class="form-label">Type Accès</label>
-          <select 
-            class="form-select" 
-            [(ngModel)]="editingEmployee()!.typeAcces" 
-            name="editTypeAcces">
-            <option value="">Sélectionner...</option>
-            @for (type of typeAccesOptions; track type) {
-              <option [value]="type">{{ type }}</option>
-            }
-          </select>
-        </div>
-        <div class="col-md-6 mb-3">
-          <label class="form-label">Session Windows</label>
-          <input 
-            type="text" 
-            class="form-control" 
-            [value]="editingEmployee()!.sessionWindows" 
-            readonly>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" (click)="modal.dismiss()">
-          Annuler
-        </button>
-        <button type="submit" class="btn btn-info">
-          <i class="feather icon-edit"></i> Enregistrer
-        </button>
-      </div>
-    </form>
-    }
   </div>
 </ng-template>

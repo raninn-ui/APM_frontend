@@ -365,7 +365,7 @@ export class AuthService {
     switch (role) {
       case 'Admin':
         // Admin goes to administration panel
-        return '/parametres/administration';
+        return '/parametres/gestion-employes';
 
       case 'Pilot':
         // Pilot goes to their plans

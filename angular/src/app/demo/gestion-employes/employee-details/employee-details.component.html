@@ -1,35 +1,51 @@
 <div class="row">
   <div class="col-xl-12">
+    <!-- Global Employee Search Bar -->
+    <div class="mb-3">
+      <div class="position-relative">
+        <input type="text" class="form-control" placeholder="Rechercher un employé..." [ngModel]="searchTerm()"
+          (input)="searchTerm.set(($any($event.target).value))">
+        <div *ngIf="searchTerm().length > 0 && filteredSearch().length > 0"
+          class="position-absolute w-100 bg-white border shadow-sm z-3 rounded mt-1"
+          style="top: 100%; left: 0; max-height: 200px; overflow-y: auto;">
+          @for (emp of filteredSearch(); track emp.matricule) {
+          <div class="p-2 border-bottom cursor-pointer" style="cursor: pointer;"
+            (click)="searchTerm.set(''); navigateToEmployee(emp.matricule)">
+            {{emp.nom}} {{emp.prenom}} ({{emp.matricule}})
+          </div>
+          }
+        </div>
+      </div>
+    </div>
+
     <!-- Header Information Section -->
     <app-card cardTitle="Informations de l'employé" class="mb-4">
-      <div class="employee-info-container">
+      <div class="employee-info-container d-flex align-items-center gap-4">
         <div class="employee-avatar">
           <i class="feather icon-user"></i>
         </div>
-        <div class="employee-details">
-          <div class="employee-name">{{ employeeInfo().prenom }} {{ employeeInfo().nom }}</div>
-          <div class="employee-meta">
-            <span class="badge bg-primary">{{ employeeInfo().responsable }}</span>
-          </div>
-          <div class="employee-fields">
-            <div class="field-group">
-              <span class="field-label">Matricule</span>
-              <span class="field-value">{{ employeeInfo().matricule }}</span>
-            </div>
-            <div class="field-group">
-              <span class="field-label">Email</span>
-              <span class="field-value">{{ employeeInfo().email }}</span>
-            </div>
-            <div class="field-group">
-              <span class="field-label">Responsable</span>
-              <span class="field-value">{{ employeeInfo().responsable }}</span>
-            </div>
-            <div class="field-group">
-              <span class="field-label">Compte Windows</span>
-              <span class="field-value"><code>{{ employeeInfo().windowsAccount }}</code></span>
-            </div>
-          </div>
-        </div>
+        <table style="border-collapse: collapse; width: 100%;">
+          <tr>
+            <td class="pe-4 py-1 text-muted">Matricule</td>
+            <td class="pe-5 py-1"><strong>{{ employeeInfo().matricule }}</strong></td>
+            <td class="pe-4 py-1 text-muted">Nom</td>
+            <td class="pe-5 py-1"><strong>{{ employeeInfo().nom }}</strong></td>
+            <td class="pe-4 py-1 text-muted">Prénom</td>
+            <td class="py-1"><strong>{{ employeeInfo().prenom }}</strong></td>
+          </tr>
+          <tr>
+            <td class="pe-4 py-1 text-muted">Responsable</td>
+            <td class="pe-5 py-1"><strong>{{ employeeInfo().responsable }}</strong></td>
+            <td class="pe-4 py-1 text-muted">E-Mail</td>
+            <td class="pe-5 py-1"><strong>{{ employeeInfo().email }}</strong></td>
+            <td class="pe-4 py-1 text-muted">Compte Windows</td>
+            <td class="pe-5 py-1"><strong><code>{{ employeeInfo().compteWin }}</code></strong></td>
+          </tr>
+          <tr>
+            <td class="pe-4 py-1 text-muted">Services</td>
+            <td class="py-1" span="5"><strong>{{ serviceLabels() }}</strong></td>
+          </tr>
+        </table>
       </div>
     </app-card>
 
@@ -45,15 +61,13 @@
               <div class="list-box-content">
                 <ul class="role-list">
                   @for (role of availableRoles(); track role) {
-                    <li 
-                      class="role-item" 
-                      [class.selected]="selectedAvailableRole() === role"
-                      (click)="selectAvailableRole(role)">
-                      {{ role }}
-                    </li>
+                  <li class="role-item" [class.selected]="selectedAvailableRole() === role"
+                    (click)="selectAvailableRole(role)">
+                    {{ role.lib }}
+                  </li>
                   }
                   @if (availableRoles().length === 0) {
-                    <li class="role-item empty-message">Aucun rôle disponible</li>
+                  <li class="role-item empty-message">Aucun rôle disponible</li>
                   }
                 </ul>
               </div>
@@ -61,17 +75,11 @@
 
             <!-- Center Buttons -->
             <div class="center-buttons">
-              <button 
-                class="btn btn-primary btn-move" 
-                (click)="moveToAssigned()"
-                [disabled]="!selectedAvailableRole()"
+              <button class="btn btn-primary btn-move" (click)="moveToAssigned()" [disabled]="!selectedAvailableRole()"
                 title="Assigner le rôle">
                 <i class="feather icon-chevron-right"></i>
               </button>
-              <button 
-                class="btn btn-primary btn-move" 
-                (click)="moveToAvailable()"
-                [disabled]="!selectedAssignedRole()"
+              <button class="btn btn-primary btn-move" (click)="moveToAvailable()" [disabled]="!selectedAssignedRole()"
                 title="Retirer le rôle">
                 <i class="feather icon-chevron-left"></i>
               </button>
@@ -83,15 +91,13 @@
               <div class="list-box-content">
                 <ul class="role-list">
                   @for (role of assignedRoles(); track role) {
-                    <li 
-                      class="role-item" 
-                      [class.selected]="selectedAssignedRole() === role"
-                      (click)="selectAssignedRole(role)">
-                      {{ role }}
-                    </li>
+                  <li class="role-item" [class.selected]="selectedAssignedRole() === role"
+                    (click)="selectAssignedRole(role)">
+                    {{ role.lib }}
+                  </li>
                   }
                   @if (assignedRoles().length === 0) {
-                    <li class="role-item empty-message">Aucun rôle assigné</li>
+                  <li class="role-item empty-message">Aucun rôle assigné</li>
                   }
                 </ul>
               </div>
@@ -113,49 +119,43 @@
           <form>
             <div class="mb-3">
               <label class="form-label">Nom</label>
-              <input 
-                type="text" 
-                class="form-control" 
-                [(ngModel)]="editableEmployee().nom" 
-                name="nom">
+              <input type="text" class="form-control" [(ngModel)]="editableEmployee().Nom" name="nom">
             </div>
             <div class="mb-3">
-              <label class="form-label">Prenom</label>
-              <input 
-                type="text" 
-                class="form-control" 
-                [(ngModel)]="editableEmployee().prenom" 
-                name="prenom">
+              <label class="form-label">Prénom</label>
+              <input type="text" class="form-control" [(ngModel)]="editableEmployee().Prenom" name="prenom">
             </div>
             <div class="mb-3">
               <label class="form-label">Responsable</label>
-              <select 
-                class="form-select" 
-                [(ngModel)]="editableEmployee().responsable" 
-                name="responsable">
+              <select class="form-select" [(ngModel)]="editableEmployee().Responsable" name="responsable">
                 <option value="">Sélectionner...</option>
-                @for (resp of responsables; track resp) {
-                  <option [value]="resp">{{ resp }}</option>
+                @for (emp of employeesForDropdown(); track emp.id) {
+                <option [value]="emp.id">{{ emp.name }}</option>
                 }
               </select>
             </div>
             <div class="mb-3">
-              <label class="form-label">Session Windows</label>
-              <input 
-                type="text" 
-                class="form-control" 
-                [(ngModel)]="editableEmployee().sessionWindows" 
-                name="sessionWindows"
-                readonly>
+              <label class="form-label">Email</label>
+              <input type="email" class="form-control" [(ngModel)]="editableEmployee().Email" name="email">
             </div>
             <div class="mb-3">
-              <label class="form-label">Email</label>
-              <input 
-                type="email" 
-                class="form-control" 
-                [(ngModel)]="editableEmployee().email" 
-                name="email">
-            </div>
+  <label class="form-label">Services</label>
+  <div class="border rounded p-2" style="max-height: 150px; overflow-y: auto;">
+    @for (service of servicesForDropdown(); track service.code) {
+      <div class="form-check">
+        <input 
+          class="form-check-input" 
+          type="checkbox" 
+          [id]="'srv-' + service.code"
+          [checked]="selectedServices().includes(service.code)"
+          (change)="toggleService(service.code)">
+        <label class="form-check-label" [for]="'srv-' + service.code">
+          {{ service.lib }}
+        </label>
+      </div>
+    }
+  </div>
+</div>
             <div class="d-grid">
               <button class="btn btn-primary" (click)="updateEmployee()">
                 <i class="feather icon-edit"></i> Modifier
@@ -167,4 +167,3 @@
     </div>
   </div>
 </div>
-

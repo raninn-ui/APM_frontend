@@ -1,10 +1,9 @@
-// angular import
 import { Component, signal, inject, TemplateRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
+import { Router } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-
-// project import
 import { SharedModule } from 'src/app/theme/shared/shared.module';
 
 interface Employee {
@@ -14,7 +13,7 @@ interface Employee {
   prenom: string;
   email: string;
   responsabilite: string;
-  service: string;
+  serviceLib: string;
   typeAcces: string;
   sessionWindows: string;
 }
@@ -28,142 +27,125 @@ interface Employee {
 })
 export class GestionEmployesComponent {
   private modalService = inject(NgbModal);
+  private router = inject(Router);
+  private http = inject(HttpClient);
 
-  // Search term
+  apiUrl = 'http://localhost:5128/api';
+
   searchTerm = '';
-
-  // Employee being edited
-  editingEmployee = signal<Employee | null>(null);
-
-  // List of employees
-  employees = signal<Employee[]>([
-    { id: 1, matricule: 1, nom: 'Benali', prenom: 'Ahmed', email: 'ahmed.benali@apm.com', responsabilite: 'Pilote', service: 'Qualité', typeAcces: 'Admin', sessionWindows: 'g1' },
-    { id: 2, matricule: 2, nom: 'Mansouri', prenom: 'Fatima', email: 'fatima.mansouri@apm.com', responsabilite: 'Rédacteur', service: 'RH', typeAcces: 'User', sessionWindows: 'g2' },
-    { id: 3, matricule: 3, nom: 'Karim', prenom: 'Mohamed', email: 'mohamed.karim@apm.com', responsabilite: 'Pilote', service: 'Production', typeAcces: 'Admin', sessionWindows: 'g3' },
-    { id: 4, matricule: 4, nom: 'Saidani', prenom: 'Nadia', email: 'nadia.saidani@apm.com', responsabilite: 'Rédacteur', service: 'Finance', typeAcces: 'User', sessionWindows: 'g4' },
-    { id: 5, matricule: 5, nom: 'Amrani', prenom: 'Youssef', email: 'youssef.amrani@apm.com', responsabilite: 'Pilote', service: 'IT', typeAcces: 'Admin', sessionWindows: 'g5' }
-  ]);
-
-  // Filtered employees based on search
+  employees = signal<Employee[]>([]);
   filteredEmployees = signal<Employee[]>([]);
 
-  // New employee form data
   newEmployee = signal({
-    matricule: null as number | null,
     nom: '',
     prenom: '',
     email: '',
     responsabilite: '',
     service: '',
-    typeAcces: '',
-    sessionWindows: ''
+    motDePasse: ''
   });
 
-  // Options for dropdowns
-  responsabilites = ['Pilote', 'Rédacteur', 'Responsable', 'Autre'];
-  services = [
-    'Gérer les ressources Materielles',
-    'Piloter le centre',
-    'Gérer les systeme D\'information',
-    'Commercialiser',
-    'Dérogation',
-    'Direction Administrative et financiére',
-    'Gérer Les Ressources Humaines',
-    'Systéme & AC',
-    'Fabriquer',
-    'Gérer Les Achats',
-    'Industrialisation',
-    'Gérer La Supply Chain'
-  ];
-  typeAccesOptions = ['User', 'Guest'];
+  responsabilites: any[] = [];
+  services: any[] = [];
 
-  constructor() {
-    this.filteredEmployees.set(this.employees());
+  ngOnInit() {
+    this.loadDropdownData();
+    this.loadEmployees();
   }
 
-  // Search employees by matricule
-  searchEmployees(): void {
-    if (this.searchTerm.trim() === '') {
-      this.filteredEmployees.set(this.employees());
-    } else {
-      const searchNum = parseInt(this.searchTerm);
-      const filtered = this.employees().filter(emp => 
-        emp.matricule === searchNum
-      );
-      this.filteredEmployees.set(filtered);
-    }
+  goToDetails(matricule: number) {
+    this.router.navigate(['/parametres/administration/' + matricule]);
   }
 
-  // Generate session windows based on matricule
-  generateSessionWindows(matricule: number): string {
-    return 'g' + matricule;
+  loadEmployees() {
+    this.http.get<any[]>(`${this.apiUrl}/employees/full`).subscribe({
+      next: (data) => {
+        this.employees.set(data.map((emp: any) => ({
+          id: emp.matricule,
+          matricule: emp.matricule,
+          nom: emp.nom,
+          prenom: emp.prenom,
+          email: emp.email,
+          responsabilite: emp.responsableName || 'Aucun',
+          serviceLib: emp.serviceLibs?.join(', ') || 'Aucun',
+          typeAcces: emp.roles.join(', '),
+          sessionWindows: emp.compteWin || ''
+        })));
+        this.filteredEmployees.set(this.employees());
+      },
+      error: (err) => console.error('Load employees error', err)
+    });
   }
 
-  // Open add employee modal
+  loadDropdownData() {
+    this.http.get<any[]>(`${this.apiUrl}/employees/full`).subscribe(emps => {
+      this.responsabilites = emps.map(e => ({ id: e.matricule, name: e.nom + ' ' + e.prenom }));
+    });
+
+    this.http.get<any[]>(`${this.apiUrl}/employees/services`).subscribe(svcs => {
+      this.services = svcs.map(s => ({ code: s.code, lib: s.lib }));
+    });
+  }
+
+  filterEmployees(event: any): void {
+    const val = event.target.value.toLowerCase();
+    const filtered = this.employees().filter(emp =>
+      emp.nom?.toLowerCase().includes(val) ||
+      emp.prenom?.toLowerCase().includes(val) ||
+      emp.matricule?.toString().includes(val)
+    );
+    this.filteredEmployees.set(filtered);
+  }
+
   openAddModal(content: TemplateRef<any>): void {
     this.resetForm();
     this.modalService.open(content, { size: 'lg', centered: true });
   }
 
-  // Open edit employee modal
-  openEditModal(content: TemplateRef<any>, employee: Employee): void {
-    this.editingEmployee.set({...employee});
-    this.modalService.open(content, { size: 'lg', centered: true });
-  }
-
-  // Add new employee
-  addEmployee(modal: any): void {
+  async addEmployee(modal: any): Promise<void> {
     const emp = this.newEmployee();
-    if (emp.matricule && emp.nom.trim() && emp.prenom.trim() && emp.email.trim()) {
-      const newEmp: Employee = {
-        id: Math.max(...this.employees().map(e => e.id), 0) + 1,
-        matricule: emp.matricule,
-        nom: emp.nom,
-        prenom: emp.prenom,
-        email: emp.email,
-        responsabilite: emp.responsabilite,
-        service: emp.service,
-        typeAcces: emp.typeAcces,
-        sessionWindows: this.generateSessionWindows(emp.matricule)
+    if (emp.nom.trim() && emp.prenom.trim() && emp.email.trim()) {
+      const payload = {
+        Nom: emp.nom,
+        Prenom: emp.prenom,
+        Email: emp.email,
+        Responsable: parseInt(emp.responsabilite) || null,
+        ServiceCode: emp.service || null,
+        MotDePasse: emp.motDePasse
       };
-
-      this.employees.update(emps => [...emps, newEmp]);
-      this.searchEmployees();
-      this.resetForm();
-      modal.dismiss();
+      try {
+        await this.http.post(`${this.apiUrl}/employees`, payload).toPromise();
+        this.loadEmployees();
+        this.resetForm();
+        modal.dismiss();
+        alert('Employé ajouté!');
+      } catch (error: any) {
+        console.error('Add employee error', error);
+        alert(`Erreur ajout: status=${error.status} message=${error.error ? JSON.stringify(error.error) : error.message}`);
+      }
     }
   }
 
-  // Update employee (only responsabilite, service, typeAcces)
-  updateEmployee(modal: any): void {
-    const emp = this.editingEmployee();
-    if (emp) {
-      this.employees.update(emps => 
-        emps.map(e => e.id === emp.id ? emp : e)
-      );
-      this.searchEmployees();
-      this.editingEmployee.set(null);
-      modal.dismiss();
-    }
-  }
-
-  // Delete employee
   deleteEmployee(id: number): void {
-    this.employees.update(emps => emps.filter(e => e.id !== id));
-    this.searchEmployees();
+    if (confirm('Confirmer suppression employé ' + id + ' ?')) {
+      this.http.delete(`${this.apiUrl}/employees/${id}`).subscribe({
+        next: () => this.loadEmployees(),
+        error: (err) => {
+          console.error('Delete error', err);
+          alert('Erreur suppression');
+        }
+      });
+    }
   }
 
-  // Reset form
   resetForm(): void {
     this.newEmployee.set({
-      matricule: null,
       nom: '',
       prenom: '',
       email: '',
       responsabilite: '',
       service: '',
-      typeAcces: '',
-      sessionWindows: ''
+      motDePasse: ''
     });
   }
 }

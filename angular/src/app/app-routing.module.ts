@@ -185,16 +185,20 @@ const routes: Routes = [
         children: [
           {
             path: '',
-            redirectTo: 'administration',
+            redirectTo: 'gestion-employes',
             pathMatch: 'full'
+          },
+          {
+            path: 'gestion-employes',
+            loadComponent: () => import('./demo/gestion-employes/gestion-employes.component').then((c) => c.GestionEmployesComponent)
           },
           {
             path: 'administration',
             loadComponent: () => import('./demo/gestion-employes/employee-details/employee-details.component').then((c) => c.EmployeeDetailsComponent)
           },
           {
-            path: 'gestion-employes',
-            loadComponent: () => import('./demo/gestion-employes/gestion-employes.component').then((c) => c.GestionEmployesComponent)
+            path: 'administration/:matricule',
+            loadComponent: () => import('./demo/gestion-employes/employee-details/employee-details.component').then((c) => c.EmployeeDetailsComponent)
           }
         ]
       },
