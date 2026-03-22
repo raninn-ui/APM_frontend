@@ -1,8 +1,5 @@
-// Angular Import
 import { NgModule } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
-
-// project import
 import { AdminComponent } from './theme/layout/admin/admin.component';
 import { GuestComponent } from './theme/layout/guest/guest.component';
 import { authGuard } from './services/auth-guard';
@@ -18,194 +15,106 @@ const routes: Routes = [
     component: AdminComponent,
     canActivate: [authGuard],
     children: [
-      { 
-        path: '',
-        redirectTo: '/analytics',
-        pathMatch: 'full'
-      },
+      { path: '', redirectTo: '/analytics', pathMatch: 'full' },
       {
         path: 'analytics',
-        loadComponent: () => import('./demo/dashboard/dash-analytics.component').then((c) => c.DashAnalyticsComponent)
+        loadComponent: () => import('./demo/dashboard/dash-analytics.component').then(c => c.DashAnalyticsComponent)
       },
       {
         path: 'component',
-        loadChildren: () => import('./demo/ui-element/ui-basic.module').then((m) => m.UiBasicModule)
+        loadChildren: () => import('./demo/ui-element/ui-basic.module').then(m => m.UiBasicModule)
       },
       {
         path: 'chart',
-        loadComponent: () => import('./demo/chart-maps/core-apex.component').then((c) => c.CoreApexComponent)
+        loadComponent: () => import('./demo/chart-maps/core-apex.component').then(c => c.CoreApexComponent)
       },
       {
         path: 'forms',
-        loadComponent: () => import('./demo/forms/form-elements/form-elements.component').then((c) => c.FormElementsComponent)
+        loadComponent: () => import('./demo/forms/form-elements/form-elements.component').then(c => c.FormElementsComponent)
       },
       {
         path: 'tables',
-        loadComponent: () => import('./demo/tables/tbl-bootstrap/tbl-bootstrap.component').then((c) => c.TblBootstrapComponent)
+        loadComponent: () => import('./demo/tables/tbl-bootstrap/tbl-bootstrap.component').then(c => c.TblBootstrapComponent)
       },
       {
         path: 'sample-page',
-        loadComponent: () => import('./demo/other/sample-page/sample-page.component').then((c) => c.SamplePageComponent)
+        loadComponent: () => import('./demo/other/sample-page/sample-page.component').then(c => c.SamplePageComponent)
       },
-      {
-        path: 'action-plans',
-        loadComponent: () => import('./demo/action-plans/action-plans.component').then((c) => c.ActionPlansComponent)
 
-      },
+      // ── Plans Usine — services grid ───────────────────────────────────────
       {
         path: 'plans-usine',
-        loadComponent: () => import('./demo/plans-usine/plans-usine.component').then((c) => c.PlansUsineComponent),
-        children: [
-          {
-            path: '',
-            redirectTo: 'ressources-materielles',
-            pathMatch: 'full'
-          },
-          {
-            path: 'ressources-materielles',
-            loadComponent: () => import('./demo/action-plans/action-plans.component').then((c) => c.ActionPlansComponent)
-          },
-          {
-            path: 'piloter-centre',
-            loadComponent: () => import('./demo/action-plans/action-plans.component').then((c) => c.ActionPlansComponent)
-          },
-          {
-            path: 'systeme-info',
-            loadComponent: () => import('./demo/action-plans/action-plans.component').then((c) => c.ActionPlansComponent)
-          },
-          {
-            path: 'commercialiser',
-            loadComponent: () => import('./demo/action-plans/action-plans.component').then((c) => c.ActionPlansComponent)
-          },
-          {
-            path: 'derogation',
-            loadComponent: () => import('./demo/action-plans/action-plans.component').then((c) => c.ActionPlansComponent)
-          },
-          {
-            path: 'direction-admin',
-            loadComponent: () => import('./demo/action-plans/action-plans.component').then((c) => c.ActionPlansComponent)
-          },
-          {
-            path: 'ressources-humaines',
-            loadComponent: () => import('./demo/action-plans/action-plans.component').then((c) => c.ActionPlansComponent)
-          },
-          {
-            path: 'systeme-ac',
-            loadComponent: () => import('./demo/action-plans/action-plans.component').then((c) => c.ActionPlansComponent)
-          },
-          {
-            path: 'fabriquer',
-            loadComponent: () => import('./demo/action-plans/action-plans.component').then((c) => c.ActionPlansComponent)
-          },
-          {
-            path: 'achats',
-            loadComponent: () => import('./demo/action-plans/action-plans.component').then((c) => c.ActionPlansComponent)
-          },
-          {
-            path: 'industrialisation',
-            loadComponent: () => import('./demo/action-plans/action-plans.component').then((c) => c.ActionPlansComponent)
-          },
-          {
-            path: 'supply-chain',
-            loadComponent: () => import('./demo/action-plans/action-plans.component').then((c) => c.ActionPlansComponent)
-          }
-        ]
+        loadComponent: () => import('./demo/plans-usine/plans-usine.component').then(c => c.PlansUsineComponent),
+        canActivate: [authGuard]
       },
+      // Dynamic route: /plans-usine/SRV001, /plans-usine/SRV002, etc.
+      // Service codes come from DB — no hardcoded paths needed
+      {
+        path: 'plans-usine/:serviceCode',
+        loadComponent: () => import('./demo/action-plans/action-plans.component').then(c => c.ActionPlansComponent),
+        canActivate: [authGuard]
+      },
+
+      // ── Mes Plans ─────────────────────────────────────────────────────────
       {
         path: 'mes-plans',
-        loadComponent: () => import('./demo/action-plans/action-plans.component').then((c) => c.ActionPlansComponent),
+        loadComponent: () => import('./demo/action-plans/action-plans.component').then(c => c.ActionPlansComponent),
         canActivate: [authGuard],
         data: { roles: ['Pilot', 'Redacteur'] }
       },
+
+      // ── Mes Actions ───────────────────────────────────────────────────────
       {
         path: 'mes-actions',
-        loadComponent: () => import('./demo/mes-actions/mes-actions.component').then((c) => c.MesActionsComponent),
+        loadComponent: () => import('./demo/mes-actions/mes-actions.component').then(c => c.MesActionsComponent),
         canActivate: [authGuard],
         data: { roles: ['Responsable'] }
       },
+
+      // ── Suivi Actions ─────────────────────────────────────────────────────
       {
         path: 'suivi-actions',
-        loadComponent: () => import('./demo/dashboard/dash-analytics.component').then((c) => c.DashAnalyticsComponent),
+        loadComponent: () => import('./demo/dashboard/dash-analytics.component').then(c => c.DashAnalyticsComponent),
         canActivate: [authGuard],
         data: { roles: ['Pilot', 'Admin'] }
       },
+
+      // ── Statistiques ──────────────────────────────────────────────────────
       {
         path: 'statistiques',
-        loadComponent: () => import('./demo/statistiques/statistiques.component').then((c) => c.StatistiquesComponent),
+        loadComponent: () => import('./demo/statistiques/statistiques.component').then(c => c.StatistiquesComponent),
         canActivate: [authGuard],
         data: { roles: ['Admin', 'Pilot', 'Consultant', 'Redacteur'] },
         children: [
-          {
-            path: '',
-            redirectTo: 'mensuel',
-            pathMatch: 'full'
-          },
-          {
-            path: 'mensuel',
-            loadComponent: () => import('./demo/statistiques/stat-mensuel/stat-mensuel.component').then((c) => c.StatMensuelComponent)
-          },
-          {
-            path: 'actions-par-service',
-            loadComponent: () => import('./demo/statistiques/stat-actions-service/stat-actions-service.component').then((c) => c.StatActionsServiceComponent)
-          },
-          {
-            path: 'usine',
-            loadComponent: () => import('./demo/statistiques/stat-usine/stat-usine.component').then((c) => c.StatUsineComponent)
-          },
-          {
-            path: 'responsables',
-            loadComponent: () => import('./demo/statistiques/stat-responsables/stat-responsables.component').then((c) => c.StatResponsablesComponent)
-          },
-          {
-            path: 'pilotes-par-service',
-            loadComponent: () => import('./demo/statistiques/stat-pilotes-service/stat-pilotes-service.component').then((c) => c.StatPilotesServiceComponent)
-          },
-          {
-            path: 'efficacites-employes',
-            loadComponent: () => import('./demo/statistiques/stat-efficacites-employes/stat-efficacites-employes.component').then((c) => c.StatEfficacitesEmployesComponent)
-          },
-          {
-            path: 'actions-employes',
-            loadComponent: () => import('./demo/statistiques/stat-actions-employes/stat-actions-employes.component').then((c) => c.StatActionsEmployesComponent)
-          },
-          {
-            path: 'verification',
-            loadComponent: () => import('./demo/other/sample-page/sample-page.component').then((c) => c.SamplePageComponent)
-          },
-          {
-            path: 'responsables-verification',
-            loadComponent: () => import('./demo/other/sample-page/sample-page.component').then((c) => c.SamplePageComponent)
-          }
+          { path: '', redirectTo: 'mensuel', pathMatch: 'full' },
+          { path: 'mensuel',                  loadComponent: () => import('./demo/statistiques/stat-mensuel/stat-mensuel.component').then(c => c.StatMensuelComponent) },
+          { path: 'actions-par-service',      loadComponent: () => import('./demo/statistiques/stat-actions-service/stat-actions-service.component').then(c => c.StatActionsServiceComponent) },
+          { path: 'usine',                    loadComponent: () => import('./demo/statistiques/stat-usine/stat-usine.component').then(c => c.StatUsineComponent) },
+          { path: 'responsables',             loadComponent: () => import('./demo/statistiques/stat-responsables/stat-responsables.component').then(c => c.StatResponsablesComponent) },
+          { path: 'pilotes-par-service',      loadComponent: () => import('./demo/statistiques/stat-pilotes-service/stat-pilotes-service.component').then(c => c.StatPilotesServiceComponent) },
+          { path: 'efficacites-employes',     loadComponent: () => import('./demo/statistiques/stat-efficacites-employes/stat-efficacites-employes.component').then(c => c.StatEfficacitesEmployesComponent) },
+          { path: 'actions-employes',         loadComponent: () => import('./demo/statistiques/stat-actions-employes/stat-actions-employes.component').then(c => c.StatActionsEmployesComponent) },
+          { path: 'verification',             loadComponent: () => import('./demo/other/sample-page/sample-page.component').then(c => c.SamplePageComponent) },
+          { path: 'responsables-verification',loadComponent: () => import('./demo/other/sample-page/sample-page.component').then(c => c.SamplePageComponent) }
         ]
       },
+
+      // ── Paramètres ────────────────────────────────────────────────────────
       {
         path: 'parametres',
         canActivate: [authGuard],
         data: { roles: ['Admin'] },
         children: [
-          {
-            path: '',
-            redirectTo: 'gestion-employes',
-            pathMatch: 'full'
-          },
-          {
-            path: 'gestion-employes',
-            loadComponent: () => import('./demo/gestion-employes/gestion-employes.component').then((c) => c.GestionEmployesComponent)
-          },
-          {
-            path: 'administration',
-            loadComponent: () => import('./demo/gestion-employes/employee-details/employee-details.component').then((c) => c.EmployeeDetailsComponent)
-          },
-          {
-            path: 'administration/:matricule',
-            loadComponent: () => import('./demo/gestion-employes/employee-details/employee-details.component').then((c) => c.EmployeeDetailsComponent)
-          }
+          { path: '', redirectTo: 'gestion-employes', pathMatch: 'full' },
+          { path: 'gestion-employes',           loadComponent: () => import('./demo/gestion-employes/gestion-employes.component').then(c => c.GestionEmployesComponent) },
+          { path: 'administration',             loadComponent: () => import('./demo/gestion-employes/employee-details/employee-details.component').then(c => c.EmployeeDetailsComponent) },
+          { path: 'administration/:matricule',  loadComponent: () => import('./demo/gestion-employes/employee-details/employee-details.component').then(c => c.EmployeeDetailsComponent) }
         ]
       },
+
       {
         path: 'aide',
-        loadComponent: () => import('./demo/other/sample-page/sample-page.component').then((c) => c.SamplePageComponent)
-
+        loadComponent: () => import('./demo/other/sample-page/sample-page.component').then(c => c.SamplePageComponent)
       }
     ]
   },
@@ -213,22 +122,10 @@ const routes: Routes = [
     path: '',
     component: GuestComponent,
     children: [
-      {
-        path: 'register',
-        loadComponent: () => import('./demo/pages/authentication/sign-up/sign-up.component').then((c) => c.SignUpComponent)
-      },
-      {
-        path: 'login',
-        loadComponent: () => import('./demo/pages/authentication/sign-in/sign-in.component').then((c) => c.SignInComponent)
-      },
-      {
-        path: 'forgot-password',
-        loadComponent: () => import('./demo/pages/authentication/forgot-password/forgot-password').then((c) => c.ForgotPassword)
-      },
-      {
-        path: 'unauthorized',
-        loadComponent: () => import('./demo/pages/authentication/unauthorized/unauthorized.component').then((c) => c.UnauthorizedComponent)
-      }
+      { path: 'register',        loadComponent: () => import('./demo/pages/authentication/sign-up/sign-up.component').then(c => c.SignUpComponent) },
+      { path: 'login',           loadComponent: () => import('./demo/pages/authentication/sign-in/sign-in.component').then(c => c.SignInComponent) },
+      { path: 'forgot-password', loadComponent: () => import('./demo/pages/authentication/forgot-password/forgot-password').then(c => c.ForgotPassword) },
+      { path: 'unauthorized',    loadComponent: () => import('./demo/pages/authentication/unauthorized/unauthorized.component').then(c => c.UnauthorizedComponent) }
     ]
   }
 ];

@@ -53,44 +53,47 @@ export interface RolePermissions {
   canManageUsers: boolean;
 }
 
-@Injectable({
-  providedIn: 'root',
-})
+@Injectable({ providedIn: 'root' })
 export class AuthService {
-  private readonly TOKEN_KEY = 'auth_token';
-  private readonly USER_KEY = 'auth_user';
-  private readonly authApiUrl = `${environment.apiUrl}/api/auth`;
+  private readonly TOKEN_KEY   = 'auth_token';
+  private readonly USER_KEY    = 'auth_user';
+  private readonly authApiUrl  = `${environment.apiUrl}/api/auth`;
   private readonly rolePriority: UserRole[] = ['Admin', 'Pilot', 'Responsable', 'Consultant', 'Redacteur'];
 
-  // Signals for reactive state
-  isLoggedIn = signal(this.hasToken());
+  isLoggedIn  = signal(this.hasToken());
   currentUser = signal<User | null>(this.getStoredUser());
-  isLoading = signal(false);
-  error = signal<string | null>(null);
+  isLoading   = signal(false);
+  error       = signal<string | null>(null);
 
   constructor(private http: HttpClient) {
-    // Check if user is already logged in on service initialization
     if (this.hasToken()) {
       this.isLoggedIn.set(true);
       const user = this.getStoredUser();
-      if (user) {
-        this.currentUser.set(user);
-      }
+      if (user) this.currentUser.set(user);
     }
   }
 
-  /**
-   * Login with email and password
-   * @param credentials - Email and password
-   * @returns Observable of LoginResponse
-   */
   login(credentials: LoginRequest): Observable<LoginResponse> {
     this.isLoading.set(true);
     this.error.set(null);
-
     return this.http.post<ApiLoginResponse>(`${this.authApiUrl}/login`, credentials).pipe(
       map((response) => this.mapLoginResponse(response)),
       tap((response) => this.handleLoginSuccess(response)),
+      catchError((error) => this.handleLoginError(error))
+    );
+  }
+
+  /**
+   * ✅ Rafraîchit le token JWT avec les rôles actuels depuis la DB.
+   * À appeler après un changement de rôles sur l'employé connecté.
+   */
+  refreshToken(): Observable<LoginResponse> {
+    return this.http.post<ApiLoginResponse>(`${this.authApiUrl}/refresh-token`, {}).pipe(
+      map((response) => this.mapLoginResponse(response)),
+      tap((response) => {
+        // Met à jour le token et l'utilisateur en mémoire + localStorage
+        this.handleLoginSuccess(response);
+      }),
       catchError((error) => this.handleLoginError(error))
     );
   }
@@ -103,10 +106,10 @@ export class AuthService {
     return {
       token: response.token,
       user: {
-        id: String(response.user.id),
+        id:    String(response.user.id),
         email: response.user.email ?? '',
-        name: [response.user.firstName, response.user.lastName].filter(Boolean).join(' ').trim() || response.user.username,
-        role: this.getPrimaryRole(roles),
+        name:  [response.user.firstName, response.user.lastName].filter(Boolean).join(' ').trim() || response.user.username,
+        role:  this.getPrimaryRole(roles),
         roles
       }
     };
@@ -114,20 +117,14 @@ export class AuthService {
 
   private mapRole(role: string): UserRole | null {
     switch (role.trim().toLowerCase()) {
-      case 'administrateur':
-        return 'Admin';
-      case 'pilote':
-        return 'Pilot';
-      case 'responsable':
-        return 'Responsable';
+      case 'administrateur': return 'Admin';
+      case 'pilote':         return 'Pilot';
+      case 'responsable':    return 'Responsable';
       case 'consultateur':
-      case 'consultant':
-        return 'Consultant';
+      case 'consultant':     return 'Consultant';
       case 'rédacteur':
-      case 'redacteur':
-        return 'Redacteur';
-      default:
-        return null;
+      case 'redacteur':      return 'Redacteur';
+      default:               return null;
     }
   }
 
@@ -135,9 +132,6 @@ export class AuthService {
     return this.rolePriority.find((role) => roles.includes(role)) ?? null;
   }
 
-  /**
-   * Handle successful login
-   */
   private handleLoginSuccess(response: LoginResponse): void {
     this.saveToken(response.token);
     this.saveUser(response.user);
@@ -146,9 +140,6 @@ export class AuthService {
     this.isLoading.set(false);
   }
 
-  /**
-   * Handle login error
-   */
   private handleLoginError(error: HttpErrorResponse): Observable<never> {
     this.isLoading.set(false);
     const errorMessage = error.error?.message || 'Login failed. Please try again.';
@@ -156,9 +147,6 @@ export class AuthService {
     return throwError(() => error);
   }
 
-  /**
-   * Logout user
-   */
   logout(): void {
     this.removeToken();
     this.removeUser();
@@ -167,225 +155,66 @@ export class AuthService {
     this.error.set(null);
   }
 
-  /**
-   * Save token to localStorage
-   */
-  private saveToken(token: string): void {
-    localStorage.setItem(this.TOKEN_KEY, token);
-  }
+  private saveToken(token: string): void   { localStorage.setItem(this.TOKEN_KEY, token); }
+  getToken(): string | null                { return localStorage.getItem(this.TOKEN_KEY); }
+  private removeToken(): void              { localStorage.removeItem(this.TOKEN_KEY); }
+  hasToken(): boolean                      { return !!localStorage.getItem(this.TOKEN_KEY); }
+  private saveUser(user: User): void       { localStorage.setItem(this.USER_KEY, JSON.stringify(user)); }
+  private removeUser(): void               { localStorage.removeItem(this.USER_KEY); }
 
-  /**
-   * Get token from localStorage
-   */
-  getToken(): string | null {
-    return localStorage.getItem(this.TOKEN_KEY);
-  }
-
-  /**
-   * Remove token from localStorage
-   */
-  private removeToken(): void {
-    localStorage.removeItem(this.TOKEN_KEY);
-  }
-
-  /**
-   * Check if token exists
-   */
-  hasToken(): boolean {
-    return !!localStorage.getItem(this.TOKEN_KEY);
-  }
-
-  /**
-   * Save user to localStorage
-   */
-  private saveUser(user: User): void {
-    localStorage.setItem(this.USER_KEY, JSON.stringify(user));
-  }
-
-  /**
-   * Get user from localStorage
-   */
   getStoredUser(): User | null {
     const user = localStorage.getItem(this.USER_KEY);
-    if (!user) {
-      return null;
-    }
-
+    if (!user) return null;
     const parsedUser = JSON.parse(user) as Partial<User>;
     const roles = Array.isArray(parsedUser.roles)
       ? parsedUser.roles
-      : parsedUser.role
-        ? [parsedUser.role]
-        : [];
-
+      : parsedUser.role ? [parsedUser.role] : [];
     return {
-      id: String(parsedUser.id ?? ''),
+      id:    String(parsedUser.id ?? ''),
       email: parsedUser.email ?? '',
-      name: parsedUser.name ?? '',
-      role: this.getPrimaryRole(roles),
+      name:  parsedUser.name ?? '',
+      role:  this.getPrimaryRole(roles),
       roles
     };
   }
 
-  /**
-   * Remove user from localStorage
-   */
-  private removeUser(): void {
-    localStorage.removeItem(this.USER_KEY);
-  }
+  getCurrentUser(): User | null        { return this.currentUser(); }
+  isAuthenticated(): boolean           { return this.isLoggedIn(); }
+  getUserRole(): UserRole | null       { return this.getCurrentUser()?.role ?? null; }
+  getUserRoles(): UserRole[]           { return this.getCurrentUser()?.roles ?? []; }
+  hasRole(role: UserRole): boolean     { return this.getUserRoles().includes(role); }
+  hasAnyRole(roles: UserRole[]): boolean { return roles.some(r => this.getUserRoles().includes(r)); }
 
-  /**
-   * Get current user
-   */
-  getCurrentUser(): User | null {
-    return this.currentUser();
-  }
-
-  /**
-   * Check if user is logged in
-   */
-  isAuthenticated(): boolean {
-    return this.isLoggedIn();
-  }
-
-  /**
-   * Get user role
-   */
-  getUserRole(): UserRole | null {
-    const user = this.getCurrentUser();
-    return user ? user.role : null;
-  }
-
-  getUserRoles(): UserRole[] {
-    const user = this.getCurrentUser();
-    return user ? user.roles : [];
-  }
-
-  /**
-   * Check if user has specific role
-   */
-  hasRole(role: UserRole): boolean {
-    return this.getUserRoles().includes(role);
-  }
-
-  /**
-   * Check if user has any of the specified roles
-   */
-  hasAnyRole(roles: UserRole[]): boolean {
-    const userRoles = this.getUserRoles();
-    return roles.some((role) => userRoles.includes(role));
-  }
-
-  /**
-   * Get permissions for current user role
-   */
   getPermissions(): RolePermissions {
     const role = this.getUserRole();
-
-    const defaultPermissions: RolePermissions = {
-      canCreatePlans: false,
-      canAssignActions: false,
-      canViewStatistics: false,
-      canValidateActions: false,
-      canClosePlans: false,
-      canViewOwnActions: false,
-      canUpdateProgress: false,
-      canCloseOwnActions: false,
-      canUploadFiles: false,
-      canAddComments: false,
-      canViewPlans: false,
-      canManageUsers: false
+    const def: RolePermissions = {
+      canCreatePlans: false, canAssignActions: false, canViewStatistics: false,
+      canValidateActions: false, canClosePlans: false, canViewOwnActions: false,
+      canUpdateProgress: false, canCloseOwnActions: false, canUploadFiles: false,
+      canAddComments: false, canViewPlans: false, canManageUsers: false
     };
-
     switch (role) {
-      case 'Admin':
-        return {
-          ...defaultPermissions,
-          canManageUsers: true,
-          canViewPlans: true,
-          canViewStatistics: true
-        };
-
-      case 'Pilot':
-        return {
-          ...defaultPermissions,
-          canCreatePlans: true,
-          canAssignActions: true,
-          canViewStatistics: true,
-          canValidateActions: true,
-          canClosePlans: true,
-          canViewPlans: true
-        };
-
-      case 'Responsable':
-        return {
-          ...defaultPermissions,
-          canViewOwnActions: true,
-          canUpdateProgress: true,
-          canCloseOwnActions: true,
-          canUploadFiles: true,
-          canAddComments: true
-        };
-
-      case 'Consultant':
-        return {
-          ...defaultPermissions,
-          canViewPlans: true,
-          canViewStatistics: true
-        };
-
-      case 'Redacteur':
-        return {
-          ...defaultPermissions,
-          canAssignActions: true,
-          canViewStatistics: true,
-          canValidateActions: true,
-          canViewPlans: true
-        };
-
-      default:
-        return defaultPermissions;
+      case 'Admin':       return { ...def, canManageUsers: true, canViewPlans: true, canViewStatistics: true };
+      case 'Pilot':       return { ...def, canCreatePlans: true, canAssignActions: true, canViewStatistics: true, canValidateActions: true, canClosePlans: true, canViewPlans: true };
+      case 'Responsable': return { ...def, canViewOwnActions: true, canUpdateProgress: true, canCloseOwnActions: true, canUploadFiles: true, canAddComments: true };
+      case 'Consultant':  return { ...def, canViewPlans: true, canViewStatistics: true };
+      case 'Redacteur':   return { ...def, canAssignActions: true, canViewStatistics: true, canValidateActions: true, canViewPlans: true };
+      default:            return def;
     }
   }
 
-  /**
-   * Check if user has specific permission
-   */
   hasPermission(permission: keyof RolePermissions): boolean {
     return this.getPermissions()[permission];
   }
 
-  /**
-   * Get redirect URL based on user role
-   * Used after successful login to redirect to appropriate dashboard
-   */
   getRedirectUrlByRole(): string {
-    const role = this.getUserRole();
-
-    switch (role) {
-      case 'Admin':
-        // Admin goes to administration panel
-        return '/parametres/gestion-employes';
-
-      case 'Pilot':
-        // Pilot goes to their plans
-        return '/mes-plans';
-
-      case 'Responsable':
-        // Responsable goes to their assigned actions
-        return '/mes-actions';
-
-      case 'Consultant':
-        // Consultant goes to statistics (read-only)
-        return '/statistiques';
-
-      case 'Redacteur':
-        // Redacteur goes to plans where they can create actions
-        return '/mes-plans';
-
-      default:
-        // Default fallback
-        return '/plans-usine';
+    switch (this.getUserRole()) {
+      case 'Admin':       return '/parametres/gestion-employes';
+      case 'Pilot':       return '/mes-plans';
+      case 'Responsable': return '/mes-actions';
+      case 'Consultant':  return '/statistiques';
+      case 'Redacteur':   return '/mes-plans';
+      default:            return '/plans-usine';
     }
   }
 }

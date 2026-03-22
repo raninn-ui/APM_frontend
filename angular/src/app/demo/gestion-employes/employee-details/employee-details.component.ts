@@ -4,6 +4,8 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { CardComponent } from 'src/app/theme/shared/components/card/card.component';
+import { AuthService } from 'src/app/services/auth';
+
 
 @Component({
   selector: 'app-employee-details',
@@ -15,6 +17,7 @@ import { CardComponent } from 'src/app/theme/shared/components/card/card.compone
 export class EmployeeDetailsComponent implements OnInit {
   private http = inject(HttpClient);
   private route = inject(ActivatedRoute);
+  private authService = inject(AuthService);
   apiUrl = 'http://localhost:5128/api';
 
   matricule = signal<number>(0);
@@ -40,6 +43,7 @@ export class EmployeeDetailsComponent implements OnInit {
     emp.prenom.toLowerCase().includes(this.searchTerm().toLowerCase()) ||
     emp.matricule.toString().includes(this.searchTerm())
   ));
+
 
   ngOnInit(): void {
     const mat = Number(this.route.snapshot.paramMap.get('matricule'));
@@ -122,12 +126,18 @@ export class EmployeeDetailsComponent implements OnInit {
   }
 
   saveAccessRights(): void {
-    const ids = this.assignedRoles().map(r => r.id);
-    this.http.put(`${this.apiUrl}/employees/${this.matricule()}/roles`, ids).subscribe({
-      next: () => alert('Droits enregistrés!'),
-      error: (err) => alert('Erreur: ' + JSON.stringify(err.error))
-    });
-  }
+  const ids = this.assignedRoles().map(r => r.id);
+  this.http.put(`${this.apiUrl}/employees/${this.matricule()}/roles`, ids).subscribe({
+    next: () => {
+      alert('Droits enregistrés!');
+      // ✅ JUSTE CES 2 LIGNES AJOUTÉES :
+      if (this.matricule() === parseInt(this.authService.getCurrentUser()?.id ?? '0', 10)) {
+        window.location.reload();
+      }
+    },
+    error: (err) => alert('Erreur: ' + JSON.stringify(err.error))
+  });
+}
 
   navigateToEmployee(mat: number): void {
     window.location.href = `/parametres/administration/${mat}`;

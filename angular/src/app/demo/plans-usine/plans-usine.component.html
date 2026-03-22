@@ -1,41 +1,287 @@
 <div class="row">
   <div class="col-xl-12">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-      <h4>Plans d'Action Usine</h4>
-      <span class="badge bg-primary fs-6">Sélectionnez un service</span>
-    </div>
 
-    <!-- Services Grid -->
-    <div class="row g-3">
-      @for (service of services; track service.id) {
-      <div class="col-md-6 col-lg-3 col-sm-6">
-        <div 
-          class="card service-card h-100 cursor-pointer" 
-          (click)="onServiceClick(service)"
-          [class.border-primary]="service.color === 'primary'"
-          [class.border-success]="service.color === 'success'"
-          [class.border-info]="service.color === 'info'"
-          [class.border-warning]="service.color === 'warning'"
-          [class.border-danger]="service.color === 'danger'"
-          [class.border-secondary]="service.color === 'secondary'">
-          <div class="card-body text-center p-2">
-            <div class="service-icon-wrapper mb-3">
-              <div 
-                class="service-icon rounded-circle d-inline-flex align-items-center justify-content-center"
-                [class.bg-primary]="service.color === 'primary'"
-                [class.bg-success]="service.color === 'success'"
-                [class.bg-info]="service.color === 'info'"
-                [class.bg-warning]="service.color === 'warning'"
-                [class.bg-danger]="service.color === 'danger'"
-                [class.bg-secondary]="service.color === 'secondary'">
-                <i [class]="service.icon"></i>
+    <!-- ═══════════════════════════════════════════════════════════
+         VUE GRILLE — Liste des services (page principale)
+    ════════════════════════════════════════════════════════════════ -->
+    <ng-container *ngIf="!showCrudPanel()">
+
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h4>Plans d'Action Usine</h4>
+        <button class="btn btn-outline-secondary" *ngIf="isAdmin()" (click)="openCrudPanel()">
+          <i class="feather icon-settings me-2"></i>Gérer les services
+        </button>
+      </div>
+
+      <!-- Loading -->
+      <div *ngIf="isLoading()" class="d-flex justify-content-center py-5">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Chargement...</span>
+        </div>
+      </div>
+
+      <!-- Error -->
+      <div *ngIf="errorMessage()" class="alert alert-danger">
+        <i class="feather icon-alert-circle me-2"></i>{{ errorMessage() }}
+      </div>
+
+      <!-- Services Grid -->
+      <div class="row g-3" *ngIf="!isLoading() && !errorMessage()">
+
+        @for (service of services(); track service.code) {
+          <div class="col-md-6 col-lg-3 col-sm-6">
+            <div
+              class="card service-card h-100 cursor-pointer"
+              (click)="onServiceClick(service)"
+              [class.border-primary]="service.color === 'primary'"
+              [class.border-success]="service.color === 'success'"
+              [class.border-info]="service.color === 'info'"
+              [class.border-warning]="service.color === 'warning'"
+              [class.border-danger]="service.color === 'danger'"
+              [class.border-secondary]="service.color === 'secondary'">
+              <div class="card-body text-center p-3">
+                <div class="service-icon-wrapper mb-3">
+                  <div
+                    class="service-icon rounded-circle d-inline-flex align-items-center justify-content-center"
+                    [class.bg-primary]="service.color === 'primary'"
+                    [class.bg-success]="service.color === 'success'"
+                    [class.bg-info]="service.color === 'info'"
+                    [class.bg-warning]="service.color === 'warning'"
+                    [class.bg-danger]="service.color === 'danger'"
+                    [class.bg-secondary]="service.color === 'secondary'">
+                    <i [class]="service.icon + ' text-white'"></i>
+                  </div>
+                </div>
+                <h6 class="service-title mb-1 fw-bold">{{ service.lib }}</h6>
               </div>
             </div>
-            <h5 class="service-title mb-0">{{ service.name }}</h5>
+          </div>
+        }
+
+        <!-- Empty state -->
+        <div *ngIf="services().length === 0" class="col-12 text-center text-muted py-5">
+          <i class="feather icon-inbox fs-1 d-block mb-2"></i>
+          Aucun service actif trouvé.
+        </div>
+
+      </div>
+    </ng-container>
+
+
+    <!-- ═══════════════════════════════════════════════════════════
+         VUE CRUD — Gestion des services
+    ════════════════════════════════════════════════════════════════ -->
+    <ng-container *ngIf="showCrudPanel()">
+
+      <!-- Header -->
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div class="d-flex align-items-center gap-3">
+          <button class="btn btn-outline-secondary btn-sm" (click)="closeCrudPanel()">
+            <i class="feather icon-arrow-left me-1"></i>Retour
+          </button>
+          <h4 class="mb-0">Gestion des services</h4>
+        </div>
+        <button class="btn btn-primary" (click)="openAddModal()">
+          <i class="feather icon-plus me-2"></i>Ajouter un service
+        </button>
+      </div>
+
+      <!-- Success -->
+      <div *ngIf="crudSuccess()" class="alert alert-success alert-dismissible d-flex align-items-center">
+        <i class="feather icon-check-circle me-2"></i>{{ crudSuccess() }}
+        <button type="button" class="btn-close ms-auto" (click)="crudSuccess.set(null)"></button>
+      </div>
+
+      <!-- Error -->
+      <div *ngIf="crudError()" class="alert alert-danger alert-dismissible d-flex align-items-center">
+        <i class="feather icon-alert-circle me-2"></i>{{ crudError() }}
+        <button type="button" class="btn-close ms-auto" (click)="crudError.set(null)"></button>
+      </div>
+
+      <!-- Loading -->
+      <div *ngIf="crudLoading()" class="d-flex justify-content-center py-5">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Chargement...</span>
+        </div>
+      </div>
+
+      <!-- Table -->
+      <div class="card" *ngIf="!crudLoading()">
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-hover mb-0 align-middle">
+              <thead class="table-light">
+                <tr>
+                  <th class="ps-3">Code</th>
+                  <th>Libellé</th>
+                  <th>Statut</th>
+                  <th>Date désactivation</th>
+                  <th class="text-end pe-3">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (s of allServices(); track s.code) {
+                  <tr [class.table-secondary]="!isActive(s)" [class.text-muted]="!isActive(s)">
+                    <td class="ps-3">
+                      <code class="fw-bold">{{ s.code }}</code>
+                    </td>
+                    <td>{{ s.lib }}</td>
+                    <td>
+                      <span class="badge" [class.bg-success]="isActive(s)" [class.bg-secondary]="!isActive(s)">
+                        {{ isActive(s) ? 'Actif' : 'Désactivé' }}
+                      </span>
+                    </td>
+                    <td>
+                      <span *ngIf="s.dateDesactivation">
+                        {{ s.dateDesactivation | date:'dd/MM/yyyy' }}
+                      </span>
+                      <span *ngIf="!s.dateDesactivation" class="text-muted">—</span>
+                    </td>
+                    <td class="text-end pe-3">
+                      <button
+                        class="btn btn-sm btn-outline-primary me-1"
+                        title="Modifier"
+                        (click)="openEditModal(s)">
+                        <i class="feather icon-edit-2"></i>
+                      </button>
+                      <button
+                        class="btn btn-sm btn-outline-danger"
+                        title="Supprimer"
+                        (click)="confirmDelete(s)">
+                        <i class="feather icon-trash-2"></i>
+                      </button>
+                    </td>
+                  </tr>
+                }
+
+                <!-- Empty -->
+                <tr *ngIf="allServices().length === 0">
+                  <td colspan="5" class="text-center text-muted py-4">
+                    <i class="feather icon-inbox d-block fs-3 mb-1"></i>
+                    Aucun service trouvé.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
-      }
+
+    </ng-container>
+
+  </div>
+</div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     MODAL — Ajouter / Modifier un service
+════════════════════════════════════════════════════════════════════════════ -->
+<div class="modal fade" [class.show]="showModal()" [style.display]="showModal() ? 'block' : 'none'"
+     tabindex="-1" role="dialog" *ngIf="showModal()">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="feather me-2" [class.icon-plus-circle]="!isEditing()" [class.icon-edit]="isEditing()"></i>
+          {{ isEditing() ? 'Modifier le service' : 'Nouveau service' }}
+        </h5>
+        <button type="button" class="btn-close" (click)="closeModal()"></button>
+      </div>
+
+      <div class="modal-body">
+
+        <!-- Error -->
+        <div *ngIf="modalError()" class="alert alert-danger py-2">
+          <i class="feather icon-alert-circle me-2"></i>{{ modalError() }}
+        </div>
+
+        <form [formGroup]="serviceForm">
+
+          <!-- Libellé -->
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Libellé <span class="text-danger">*</span></label>
+            <input
+              type="text"
+              class="form-control"
+              formControlName="lib"
+              placeholder="Ex: Logistique"
+              [class.is-invalid]="serviceForm.get('lib')?.invalid && serviceForm.get('lib')?.touched">
+            <div class="invalid-feedback">Le libellé est obligatoire.</div>
+          </div>
+
+          <!-- Date désactivation (optionnel) -->
+          <div class="mb-3">
+            <label class="form-label fw-semibold">Date de désactivation <span class="text-muted">(optionnel)</span></label>
+            <input
+              type="date"
+              class="form-control"
+              formControlName="dateDesactivation">
+            <small class="text-muted">Laisser vide pour un service actif.</small>
+          </div>
+
+        </form>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline-secondary" (click)="closeModal()" [disabled]="modalLoading()">
+          Annuler
+        </button>
+        <button
+          type="button"
+          class="btn btn-primary"
+          (click)="submitForm()"
+          [disabled]="serviceForm.invalid || modalLoading()">
+          <span *ngIf="modalLoading()" class="spinner-border spinner-border-sm me-2"></span>
+          {{ isEditing() ? 'Enregistrer' : 'Ajouter' }}
+        </button>
+      </div>
+
     </div>
   </div>
 </div>
+<div class="modal-backdrop fade show" *ngIf="showModal()" (click)="closeModal()"></div>
+
+
+<!-- ═══════════════════════════════════════════════════════════════════════════
+     MODAL — Confirmer suppression
+════════════════════════════════════════════════════════════════════════════ -->
+<div class="modal fade" [class.show]="deleteTarget()" [style.display]="deleteTarget() ? 'block' : 'none'"
+     tabindex="-1" role="dialog" *ngIf="deleteTarget()">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+
+      <div class="modal-header border-0">
+        <h5 class="modal-title text-danger">
+          <i class="feather icon-alert-triangle me-2"></i>Confirmer la suppression
+        </h5>
+        <button type="button" class="btn-close" (click)="cancelDelete()"></button>
+      </div>
+
+      <div class="modal-body text-center py-4">
+        <p class="mb-1">Voulez-vous supprimer le service :</p>
+        <h5 class="fw-bold">{{ deleteTarget()?.lib }} <code class="fs-6">({{ deleteTarget()?.code }})</code></h5>
+        <p class="text-muted small mt-2">
+          <i class="feather icon-info me-1"></i>
+          Cette action est irréversible. La suppression sera bloquée si des plans utilisent ce service.
+        </p>
+      </div>
+
+      <div class="modal-footer border-0 justify-content-center gap-2">
+        <button type="button" class="btn btn-outline-secondary px-4" (click)="cancelDelete()" [disabled]="deleteLoading()">
+          Annuler
+        </button>
+        <button
+          type="button"
+          class="btn btn-danger px-4"
+          (click)="executeDelete()"
+          [disabled]="deleteLoading()">
+          <span *ngIf="deleteLoading()" class="spinner-border spinner-border-sm me-2"></span>
+          Supprimer
+        </button>
+      </div>
+
+    </div>
+  </div>
+</div>
+<div class="modal-backdrop fade show" *ngIf="deleteTarget()" (click)="cancelDelete()"></div>
