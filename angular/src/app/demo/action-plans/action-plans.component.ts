@@ -286,15 +286,17 @@ export class ActionPlansComponent implements OnInit {
    *   (i.e. the service appears in their servicesList from /api/service/mes-services)
    */
   canAddPlan(): boolean {
-  // ✅ Doit être Pilote 
+  // ✅ Vérifier tous les formats possibles du rôle Pilote
   const role = this.authService.getUserRole();
-  const isPilote = role === 'Pilot' ;
+  const roles = this.authService.getUserRoles();
+  
+  const isPilote = role === 'Pilot'  
+    || roles.includes('Pilot') ;
+  
   if (!isPilote) return false;
 
-  // ✅ En mode mes-plans → toujours oui (déjà Pilote)
   if (this.pageMode === 'mes-plans') return true;
 
-  // ✅ En mode usine → vérifier que ce service est dans les services autorisés de l'employé
   const allowed = this.servicesList();
   if (!allowed.length) return false;
   return allowed.some(s => s.code === this.usineServiceCode);

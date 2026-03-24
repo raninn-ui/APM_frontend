@@ -126,18 +126,23 @@ export class EmployeeDetailsComponent implements OnInit {
   }
 
   saveAccessRights(): void {
-  const ids = this.assignedRoles().map(r => r.id);
-  this.http.put(`${this.apiUrl}/employees/${this.matricule()}/roles`, ids).subscribe({
-    next: () => {
-      alert('Droits enregistrés!');
-      // ✅ JUSTE CES 2 LIGNES AJOUTÉES :
-      if (this.matricule() === parseInt(this.authService.getCurrentUser()?.id ?? '0', 10)) {
-        window.location.reload();
-      }
-    },
-    error: (err) => alert('Erreur: ' + JSON.stringify(err.error))
-  });
-}
+    const ids = this.assignedRoles().map(r => r.id);
+    this.http.put(`${this.apiUrl}/employees/${this.matricule()}/roles`, ids).subscribe({
+      next: () => {
+        const currentMatricule = parseInt(this.authService.getCurrentUser()?.id ?? '0', 10);
+        if (this.matricule() === currentMatricule) {
+          // Current user's roles changed → refresh token silently
+          this.authService.refreshToken().subscribe({
+            next: () => alert('Droits enregistrés et session mise à jour!'),
+            error: () => alert('Droits enregistrés — reconnectez-vous pour appliquer les changements')
+          });
+        } else {
+          alert('Droits enregistrés!');
+        }
+      },
+      error: (err) => alert('Erreur: ' + JSON.stringify(err.error))
+    });
+  }
 
   navigateToEmployee(mat: number): void {
     window.location.href = `/parametres/administration/${mat}`;

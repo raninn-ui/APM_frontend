@@ -206,6 +206,14 @@
             <span class="info-label">Pilote :</span>
             <span class="info-value">{{ selectedPlan()?.pilots?.[0] }}</span>
           </div>
+          <div class="info-item" *ngIf="selectedPlan()?.redacteurs?.length">
+            <span class="info-label">Rédacteur(s) :</span>
+            <span class="info-value">
+              <span *ngFor="let r of selectedPlan()?.redacteurs; let last = last">
+                {{ r }}<span *ngIf="!last">, </span>
+              </span>
+            </span>
+          </div>
         </div>
       </div>
 
